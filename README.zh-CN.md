@@ -1,18 +1,20 @@
-# Paseo 对话文件夹
+# Paseo 对话文件夹增强版
 
 [English](README.md)
 
 用文件夹、独立标签页和拖动操作整理已有的 Paseo 对话。
+
+基于 Cocean001 的 [Conversation folders](https://github.com/Cocean001/paseo-conversation-folders)（MIT 许可）。这个版本增加了“最近”分区、与 Paseo 一致的项目图标、按设备记住的折叠状态、Windows 上的重命名和删除，以及简体中文界面。
 
 ## 安装
 
 守护进程和客户端需要 Paseo `>=0.16.0-beta.1 <0.18.0`。
 
 ```sh
-paseo plugin install https://github.com/Cocean001/paseo-conversation-folders
+paseo plugin install https://github.com/xiaobaifly7/paseo-conversation-folders
 ```
 
-在 **设置 → 侧边栏 → 视图** 中选择 **对话文件夹**。Paseo 按设备保存这个选择，电脑客户端、浏览器和手机需要各选一次。
+在 **设置 → 侧边栏 → 视图** 中选择 **对话文件夹增强版**。Paseo 按设备保存这个选择，电脑客户端、浏览器和手机需要各选一次。
 
 ## 使用
 

@@ -1,5 +1,5 @@
 {
-  "name": "paseo-conversation-folders-sidebar",
+  "name": "paseo-conversation-folders-plus",
   "private": false,
   "version": "0.2.0-beta.1",
   "scripts": {
@@ -19,7 +19,7 @@
   "description": "Organize existing Paseo conversations with folders, custom tabs, project grouping, and filters.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Cocean001/paseo-conversation-folders.git"
+    "url": "git+https://github.com/xiaobaifly7/paseo-conversation-folders.git"
   },
   "files": [
     "paseo-plugin.json",
@@ -32,6 +32,7 @@
     "client/",
     "shared/",
     "server/",
-    "assets/screenshots/"
+    "assets/screenshots/",
+    "LICENSE"
   ]
 }

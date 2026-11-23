@@ -1,18 +1,20 @@
-# Conversation folders for Paseo
+# Conversation folders Plus for Paseo
 
 [简体中文](README.zh-CN.md)
 
 Organize existing Paseo conversations with folders, separate tabs, and drag and drop.
+
+Based on [Conversation folders](https://github.com/Cocean001/paseo-conversation-folders) by Cocean001 (MIT). This edition adds a Recent list, Paseo-style project tiles, per-device fold state, Windows support for rename and delete, and Simplified Chinese.
 
 ## Install
 
 Requires Paseo `>=0.16.0-beta.1 <0.18.0` on the daemon and clients.
 
 ```sh
-paseo plugin install https://github.com/Cocean001/paseo-conversation-folders
+paseo plugin install https://github.com/xiaobaifly7/paseo-conversation-folders
 ```
 
-Select **Conversation folders** in **Settings → Sidebar → Sidebar view**. Paseo stores this choice per device, so select it in each desktop app, browser, and phone you use.
+Select **Conversation folders Plus** in **Settings → Sidebar → Sidebar view**. Paseo stores this choice per device, so select it in each desktop app, browser, and phone you use.
 
 ## Use
 

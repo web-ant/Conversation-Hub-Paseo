@@ -1,8 +1,8 @@
 import { defineTranslations, useTranslation } from '@getpaseo/plugin/client';
 
 export const messages = defineTranslations({ resources: {
-  en: { viewTitle: 'Conversation folders', viewDescription: 'Projects and folders with their conversations listed below' },
-  'zh-CN': { viewTitle: '对话文件夹', viewDescription: '按项目和文件夹竖排列出对话' },
+  en: { viewTitle: 'Conversation folders Plus', viewDescription: 'Projects and folders with their conversations listed below' },
+  'zh-CN': { viewTitle: '对话文件夹增强版', viewDescription: '按项目和文件夹竖排列出对话' },
 } });
 
 // English source text is the key, so untranslated strings fall back to English unchanged.
