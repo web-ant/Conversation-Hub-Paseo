@@ -5,7 +5,7 @@ const ts = require('typescript');
 const source = ts.transpileModule(fs.readFileSync(require.resolve('../client/visuals.tsx'), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
 const jsx = (type, props) => ({ type, props });
 const mod = { exports: {} };
-new Function('require', 'exports', source)(name => ({ react: {}, 'react/jsx-runtime': { jsx, jsxs: jsx }, 'react-native': { View: 'View', ActivityIndicator: 'Spinner' }, '@getpaseo/plugin/client/ui': {} })[name], mod.exports);
+new Function('require', 'exports', source)(name => ({ './i18n':{t:s=>s}, react: {}, 'react/jsx-runtime': { jsx, jsxs: jsx }, 'react-native': { View: 'View', ActivityIndicator: 'Spinner' }, '@getpaseo/plugin/client/ui': {} })[name], mod.exports);
 const theme = { colors: { accent: 'blue', foregroundMuted: 'gray', statusDanger: 'red', statusWarning: 'yellow', statusSuccess:'green' } };
 test('busy, failure, permission and completion states have distinct visible indicators', () => {
   const render = state => mod.exports.StatusMark({ state, theme });

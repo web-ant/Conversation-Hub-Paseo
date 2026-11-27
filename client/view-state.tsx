@@ -7,6 +7,7 @@ const empty: State = { open: {}, showAll: [], activeTab: null, titleLines: null 
 interface ViewApi {
   isOpen(key: string, fallback: boolean): boolean;
   setOpen(key: string, open: boolean): void;
+  reveal(keys:readonly string[]):void;
   register(key: string, fallback: boolean): () => void;
   showAll(key: string): boolean;
   setShowAll(key: string, value: boolean): void;
@@ -26,8 +27,8 @@ export function ViewStateProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<State | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const beforeCollapse = useRef<Record<string, boolean>>({});
-  const branches = useRef(new Map<string, boolean>());
-  const register = useRef((key: string, fallback: boolean) => { branches.current.set(key, fallback); return () => { branches.current.delete(key); }; }).current;
+  const branches = useRef(new Map<string, number>());
+  const register = useRef((key: string, fallback: boolean) => { branches.current.set(key, (branches.current.get(key) ?? 0) + 1); let registered=true; return () => { if(!registered)return; registered=false; const count=branches.current.get(key) ?? 0; if(count>1)branches.current.set(key,count-1);else branches.current.delete(key); }; }).current;
   const dirty = useRef(false);
   useEffect(() => { if (!state && settings.status === 'ready') setState(settings.values); }, [settings.status, state]);
   useEffect(() => {
@@ -45,6 +46,7 @@ export function ViewStateProvider({ children }: { children: ReactNode }) {
     isOpen: (key, fallback) => current.open[key] ?? fallback,
     setOpen: (key, open) => update(value => ({ ...value, open: { ...value.open, [key]: open } })),
     register,
+    reveal: keys => { setCollapsed(false); update(value=>({...value,open:{...value.open,...Object.fromEntries(keys.map(key=>[key,true]))}})); },
     showAll: key => current.showAll.includes(key),
     setShowAll: (key, show) => update(value => ({ ...value, showAll: show ? [...new Set([...value.showAll, key])] : value.showAll.filter(item => item !== key) })),
     activeTab: current.activeTab,

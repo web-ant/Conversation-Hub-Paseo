@@ -12,7 +12,6 @@ export function matchesConversation(agent: ConversationSnapshot, options: Conver
   if (agent.background) return false;
   // Subtasks sit under their visible parent conversation; search and status filters still find them directly.
   if (options.parents && agent.parentAgent && options.parents.has(agent.parentAgent.key) && !options.search.trim() && options.filter === 'all') return false;
-  if (options.pinned?.has(`${agent.hostId}:${agent.id}`) && !options.search.trim() && options.filter === 'all') return false;
   if (options.members && !options.members.some(member => member.hostId === agent.hostId && member.agentId === agent.id)) return false;
   if (options.workspaceKeys && (!agent.workspace || !options.workspaceKeys.includes(agent.workspace.key))) return false;
   if (options.search.trim() && !(agent.title || 'Untitled conversation').toLocaleLowerCase().includes(options.search.trim().toLocaleLowerCase())) return false;

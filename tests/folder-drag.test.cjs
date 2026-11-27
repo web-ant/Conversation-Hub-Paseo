@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const ts = require('typescript');
 function load(file, imports) {
  const mod={exports:{}};const code=ts.transpileModule(fs.readFileSync(require.resolve(file),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
- new Function('require','exports',code)(name=>imports[name],mod.exports);return mod.exports;
+ new Function('require','exports',code)(name=>name==='./i18n'?{t:s=>s}:imports[name],mod.exports);return mod.exports;
 }
 const model=load('../shared/model.ts',{});
 function harness(source={hostId:'local',groupId:'a'}) {

@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Platform, View } from 'react-native';
 import type { PluginSidebarViewProps } from '@getpaseo/plugin/client';
@@ -47,7 +48,7 @@ export function DragFolderRow({ source, children, disabled = false }: { source: 
     element.addEventListener('dragstart', start); element.addEventListener('dragend', end);
     return () => { element.removeEventListener('dragstart', start); element.removeEventListener('dragend', end); element.draggable = false; element.removeAttribute?.('data-paseo-sidebar-dragging'); };
   }, [context, source.hostId, source.groupId, disabled, touch, steady]);
-  return <View ref={ref} accessibilityHint="Drag into a folder, or to its top or bottom edge to reorder" style={{ minWidth: 0, ...(dragging ? { opacity: 0.5 } : {}) }}>{children}</View>;
+  return <View ref={ref} accessibilityHint={t("Drag into a folder, or to its top or bottom edge to reorder")} style={{ minWidth: 0, ...(dragging ? { opacity: 0.5 } : {}) }}>{children}</View>;
 }
 /** Row edges reorder; the center nests. Root targets promote back to the top level. */
 export function FolderDropTarget({ hostId, group, root = false, topLevel = true, view, children, activate, insideOnly = false, anyHost = false }: { hostId: string; group?: Group; root?: boolean; topLevel?: boolean; view: PluginSidebarViewProps; children: ReactNode; activate?(): void; insideOnly?: boolean; anyHost?: boolean }) {

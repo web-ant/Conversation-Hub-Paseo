@@ -1,3 +1,4 @@
+import { useSidebarMetrics } from './density';
 import { useRef, useState } from 'react';
 import { Animated, Text, View } from 'react-native';
 import { useAgent, useAgents, useHosts, useWorkspaces, useSettings, type AgentRef, type PluginSidebarViewProps } from '@getpaseo/plugin/client';
@@ -47,6 +48,7 @@ function CurrentBranch({ branch, expanded, toggleOpen, references, group, hostId
 
 /** Select connected sources; only sidebar assignments are saved. */
 export function FolderAdd({ hostId, group, view }: { hostId: string; group: Group; view: PluginSidebarViewProps }) {
+  const metrics = useSidebarMetrics();
   const { addConversations, revision, pickerTree = [] } = useConversationView();
   const hosts = useHosts();
   const workspaces = useWorkspaces({ groupBy: workspace => ({ key: workspace.ref.key, title: workspace.title || workspace.name || workspace.projectDisplayName }) });
@@ -66,7 +68,7 @@ export function FolderAdd({ hostId, group, view }: { hostId: string; group: Grou
   const plusHighlight = useMotion(plusHovered ? 1 : 0);
   const button = (label: string, action: () => void, disabled = busy) => <FeedbackPressable theme={view.theme} accessibilityRole="button" accessibilityLabel={label} disabled={disabled} onPress={action} style={{ minHeight: 40, paddingHorizontal: 8, justifyContent: 'center', backgroundColor: c.surface1, borderRadius: 5 }}><Text style={{ color: c.foreground, fontSize: 12 }}>{label === 'Cancel adding conversations' ? t('Cancel') : label === 'Add selected conversations' ? selected.length ? t('Add {0} conversations', selected.length) : t('Add conversations') : label === 'Adding conversations…' ? t('Adding conversations…') : label}</Text></FeedbackPressable>;
   return <>
-    <FeedbackPressable theme={view.theme} hoverBackground="transparent" onHoverIn={() => setPlusHovered(true)} onHoverOut={() => setPlusHovered(false)} onFocus={() => setPlusHovered(true)} onBlur={() => setPlusHovered(false)} accessibilityRole="button" accessibilityLabel={`Add conversations to ${group.name}`} disabled={!addConversations} onPress={() => { openedRevision.current = revision; setSelected([]); setPickerView('current'); setExpanded(new Set()); setSourceHost(hosts.length===1?hosts[0].serverId:null); setWorkspaceKey(null); setError(null); setOpen(true); }} style={{ width: view.layout.compact ? 44 : 32, minHeight: view.layout.compact ? 44 : 36, alignItems: 'center', justifyContent: 'center', position: 'relative' }}><Animated.View pointerEvents="none" style={{position:'absolute',width:24,height:24,borderRadius:5,backgroundColor:c.surface2,opacity:plusHighlight}} /><Glyph name="plus" color={c.foregroundMuted} /></FeedbackPressable>
+    <FeedbackPressable theme={view.theme} hoverBackground="transparent" onHoverIn={() => setPlusHovered(true)} onHoverOut={() => setPlusHovered(false)} onFocus={() => setPlusHovered(true)} onBlur={() => setPlusHovered(false)} accessibilityRole="button" accessibilityLabel={`Add conversations to ${group.name}`} disabled={!addConversations} onPress={() => { openedRevision.current = revision; setSelected([]); setPickerView('current'); setExpanded(new Set()); setSourceHost(hosts.length===1?hosts[0].serverId:null); setWorkspaceKey(null); setError(null); setOpen(true); }} style={{ width: view.layout.compact ? 44 : metrics.dense ? 28 : 32, minHeight: metrics.action, alignItems: 'center', justifyContent: 'center', position: 'relative' }}><Animated.View pointerEvents="none" style={{position:'absolute',width:24,height:24,borderRadius:5,backgroundColor:c.surface2,opacity:plusHighlight}} /><Glyph name="plus" color={c.foregroundMuted} /></FeedbackPressable>
     <ActionDialog open={open} title={t('Add conversations')} busy={busy} close={close} view={view}>
       <Text style={{color:c.foregroundMuted,fontSize:12}}>{t('Choose conversations for “{0}”.', group.name)}</Text>
       <View accessibilityRole="tablist" style={{flexDirection:'row',padding:3,gap:3,borderRadius:6,backgroundColor:c.surface1}}>
@@ -106,13 +108,13 @@ export function FolderAdd({ hostId, group, view }: { hostId: string; group: Grou
         {!hosts.length&&<Text style={{color:c.foregroundMuted,padding:12}}>{t('No connected servers')}</Text>}
       </View>}
       <Text style={{ color: c.foregroundMuted, fontSize: 11 }}>{t('{0} selected', selected.length)}</Text>
-      {error && <Text accessibilityRole="alert" style={{ color: c.statusDanger, fontSize: 12 }}>{error}</Text>}
+      {error && <Text accessibilityRole="alert" style={{ color: c.statusDanger, fontSize: 12 }}>{error ? t(error) : null}</Text>}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8 }}>
         {button('Cancel adding conversations', close)}
         {button(busy ? 'Adding conversations…' : 'Add selected conversations', () => {
           if (pending.current || !selected.length || !addConversations) return;
           pending.current = true; setBusy(true); setError(null);
-          void addConversations(selected, { hostId, groupId: group.id }, openedRevision.current).then(saved => { if (saved) setOpen(false); else setError('Could not save. The folder may have changed; close and reopen this picker, then retry.'); }).catch(() => setError('Could not add conversations. Check the server connection and retry.')).finally(() => { pending.current = false; setBusy(false); });
+          void addConversations(selected, { hostId, groupId: group.id }, openedRevision.current).then(saved => { if (saved) setOpen(false); else setError(t('Could not save. The folder may have changed; close and reopen this picker, then retry.')); }).catch(() => setError(t('Could not add conversations. Check the server connection and retry.'))).finally(() => { pending.current = false; setBusy(false); });
         }, busy || !selected.length)}
       </View>
     </ActionDialog>

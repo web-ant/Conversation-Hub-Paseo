@@ -98,16 +98,16 @@ export function DropdownMenu({ anchor, items, close, view, busy = false, error, 
   }
   return <Modal transparent visible animationType="none" onRequestClose={close} onShow={() => rootRefs.current[0]?.focus()}>
     <View style={{ flex: 1 }} {...{ onKeyDown: keyboard }}>
-      <Pressable accessibilityLabel="Dismiss view options" onPress={close} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
-      <Animated.View accessibilityRole="menu" accessibilityLabel="View options menu" style={[panel, { position: 'absolute', left, top, width: menuWidth, maxHeight: height - top - 8, opacity: progress }]}>
+      <Pressable accessibilityLabel={t("Dismiss view options")} onPress={close} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+      <Animated.View accessibilityRole="menu" accessibilityLabel={t("View options menu")} style={[panel, { position: 'absolute', left, top, width: menuWidth, maxHeight: height - top - 8, opacity: progress }]}>
         <ScrollView keyboardShouldPersistTaps="handled">
           {(!compact || !submenu) && header}
           {compact && submenu ? <>
-            <FeedbackPressable theme={view.theme} onPress={() => { setSubmenu(null); activeIndex.current = parentIndex; rootRefs.current[parentIndex]?.focus(); }} accessibilityLabel="Back to view options" style={{ minHeight: rowHeight, paddingHorizontal: 10, justifyContent: 'center' }}><Text style={{ color: c.foregroundMuted, fontSize: 12 }}>‹ {parent?.label}</Text></FeedbackPressable>
+            <FeedbackPressable theme={view.theme} onPress={() => { setSubmenu(null); activeIndex.current = parentIndex; rootRefs.current[parentIndex]?.focus(); }} accessibilityLabel={t("Back to view options")} style={{ minHeight: rowHeight, paddingHorizontal: 10, justifyContent: 'center' }}><Text style={{ color: c.foregroundMuted, fontSize: 12 }}>‹ {parent?.label}</Text></FeedbackPressable>
             {rows(childItems, true)}
           </> : rows(items, false)}
           {busy && <Text accessibilityLiveRegion="polite" style={{ color: c.foregroundMuted, fontSize: 11, padding: 8 }}>{t('Saving…')}</Text>}
-          {error && <Text accessibilityRole="alert" style={{ color: c.statusDanger, fontSize: 11, padding: 8 }}>{error}</Text>}
+          {error && <Text accessibilityRole="alert" style={{ color: c.statusDanger, fontSize: 11, padding: 8 }}>{error ? t(error) : null}</Text>}
         </ScrollView>
       </Animated.View>
       {!compact && submenu && <View accessibilityRole="menu" accessibilityLabel={parent?.label} style={[panel, { position: 'absolute', left: flyoutLeft, top: subTop, width: subWidth, maxHeight: height - subTop - 8 }]}><ScrollView keyboardShouldPersistTaps="handled">{rows(childItems, true)}</ScrollView></View>}

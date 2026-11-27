@@ -6,11 +6,11 @@ const source=ts.transpileModule(fs.readFileSync(require.resolve('../client/conte
 function harness(){
  let cursor=0,states=[],closed=0,chosen=0,focused=[];
  const jsx=(type,props)=>({type,props});
- const imports={react:{useEffect(){},useRef(value){const i=cursor++;if(!(i in states))states[i]={current:value};return states[i];}},'react/jsx-runtime':{jsx,jsxs:jsx},'react-native':{View:'View',Text:'Text',Modal:'Modal',Pressable:'Pressable',Animated:{View:'AnimatedView'},useWindowDimensions:()=>({width:390,height:800})},'./visuals':{FeedbackPressable:'Button',useMotion:()=>1}};
+ const imports={'../shared/popover':require('./folder-fixture.cjs'),'./i18n':{t:s=>s},react:{useEffect(){},useRef(value){const i=cursor++;if(!(i in states))states[i]={current:value};return states[i];}},'react/jsx-runtime':{jsx,jsxs:jsx},'react-native':{ScrollView:'ScrollView',View:'View',Text:'Text',Modal:'Modal',Pressable:'Pressable',Animated:{View:'AnimatedView'},useWindowDimensions:()=>({width:390,height:800})},'./visuals':{FeedbackPressable:'Button',useMotion:()=>1}};
  const mod={exports:{}};new Function('require','exports',source)(name=>imports[name],mod.exports);
  const actions=[{id:'rename',label:'Rename',onSelect(){chosen++;}},{id:'disabled',label:'Unavailable',disabled:true,onSelect(){}},{id:'collapse',label:'Collapse',onSelect(){}}];
  cursor=0;const tree=mod.exports.ContextMenu({anchor:{x:388,y:799},actions,close(){closed++;},view:{layout:{compact:false},theme:{colors:{}}}});
- const body=tree.props.children, menu=body.props.children[1],items=menu.props.children;
+ const body=tree.props.children, menu=body.props.children[1],items=menu.props.children.props.children;
  items.forEach((item,i)=>item.props.focusRef({focus(){focused.push(i);}}));
  return{tree,body,menu,items,focused,closed:()=>closed,chosen:()=>chosen};
 }

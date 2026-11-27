@@ -172,13 +172,15 @@ export function createEngine(root: { current: unknown }, setGhost: (ghost: { lab
 }
 
 /** The sidebar scroller: locked while a row is lifted, and scrolled by the engine near its edges. */
-export function TouchScrollView({ onScroll, onContentSizeChange, ...props }: ScrollViewProps & { children?: ReactNode }) {
+export function TouchScrollView({ onScroll, onContentSizeChange, scrollRef, ...props }: ScrollViewProps & { children?: ReactNode; scrollRef?: import('react').RefObject<ScrollView|null> }) {
   const engine = useTouchDrag();
   const node = useRef<ScrollView>(null);
   const metrics = useRef({ offset: 0, content: 0 });
   const [locked, setLocked] = useState(false);
   useEffect(() => engine?.attachScroll({ node: node as unknown as ScrollHandle['node'], metrics, setLocked }), [engine]);
-  return <ScrollView {...props} ref={node} scrollEnabled={!locked && props.scrollEnabled !== false} scrollEventThrottle={16}
+  // Expanding nested folders changes offscreen bounds; Android's native
+  // clipping can otherwise detach a branch that has just become visible.
+  return <ScrollView {...props} removeClippedSubviews={Platform.OS === 'android' ? false : props.removeClippedSubviews} ref={value=>{node.current=value;if(scrollRef)scrollRef.current=value;}} scrollEnabled={!locked && props.scrollEnabled !== false} scrollEventThrottle={16}
     onScroll={event => { metrics.current.offset = event.nativeEvent.contentOffset.y; onScroll?.(event); }}
     onContentSizeChange={(width, height) => { metrics.current.content = height; onContentSizeChange?.(width, height); }} />;
 }

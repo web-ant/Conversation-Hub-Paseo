@@ -1,5 +1,5 @@
 /** Pure immutable operations. No agent or workspace is modified or deleted. */
-export interface Group { id: string; parentId?: string; topLevel?: boolean; projectKey?: string; name: string; agentIds: string[] }
+export interface Group { id: string; parentId?: string; topLevel?: boolean; projectKey?: string; name: string; icon?: string; color?: string; pinned?: boolean; workspacePaths?:string[]; agentIds: string[] }
 export interface FolderAssignment { hostId: string; agentId: string; folderHostId: string; groupId: string | null; beforeId?: string; beforeHostId?: string }
 export interface Organization { assignments?: FolderAssignment[]; mode: 'folders' | 'dividers'; groups: Group[]; ungroupedOrder: string[] }
 export function moveAgent(state: Organization, agentId: string, groupId: string | null, beforeId?: string): Organization {

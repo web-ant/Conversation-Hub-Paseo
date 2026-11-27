@@ -5,9 +5,10 @@ const ts = require('typescript');
 
 const jsx = (type, props) => ({ type, props });
 const react = { createContext: () => ({}), useContext: () => null, useRef: value => ({ current: value }), useState: value => [value, () => {}], useEffect() {} };
+const platform = { OS: 'ios' };
 const mod = { exports: {} };
 const code = ts.transpileModule(fs.readFileSync(require.resolve('../client/touch-drag.tsx'), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
-new Function('require', 'exports', code)(name => ({ './steady': { useSteadyControl: () => null }, react, 'react/jsx-runtime': { jsx, jsxs: jsx }, 'react-native': { View: 'View', Text: 'Text', ScrollView: 'ScrollView', Platform: { OS: 'ios' } } })[name], mod.exports);
+new Function('require', 'exports', code)(name => ({ './steady': { useSteadyControl: () => null }, react, 'react/jsx-runtime': { jsx, jsxs: jsx }, 'react-native': { View: 'View', Text: 'Text', ScrollView: 'ScrollView', Platform: platform } })[name], mod.exports);
 const { underFinger, edgeSpeed, createEngine } = mod.exports;
 const tick = () => new Promise(resolve => setImmediate(resolve));
 const node = (top, height) => ({ current: { measure: callback => callback(0, 0, 300, height, 0, top) } });
@@ -65,4 +66,33 @@ test('a cancelled touch neither drops nor opens the menu, and unlocks scrolling'
   h.engine.touchStart(120); h.engine.lift({ kind: 'conversation', value: { hostId: 'h', agentId: 'a' } }, 'Chat', () => menus++);
   h.engine.touchMove(200); await tick(); h.engine.cancel(); h.engine.touchEnd(); await tick();
   assert.equal(menus, 0); assert.deepEqual(h.commits, []); assert.equal(h.locks.at(-1), false);
+});
+
+
+test('Android retains expanding offscreen branches while scroll refs and callbacks still work', () => {
+  platform.OS = 'android';
+  try {
+    const offsets = [], sizes = [], scrollRef = { current: null };
+    const tree = mod.exports.TouchScrollView({ removeClippedSubviews: true, scrollRef,
+      onScroll: event => offsets.push(event.nativeEvent.contentOffset.y),
+      onContentSizeChange: (width, height) => sizes.push([width, height]),
+    });
+    assert.equal(tree.props.removeClippedSubviews, false);
+    const node = { scrollTo() {} };
+    tree.props.ref(node); assert.equal(scrollRef.current, node);
+    tree.props.onScroll({ nativeEvent: { contentOffset: { y: 720 } } });
+    tree.props.onContentSizeChange(300, 4000);
+    assert.deepEqual(offsets, [720]); assert.deepEqual(sizes, [[300, 4000]]);
+    tree.props.ref(null); assert.equal(scrollRef.current, null);
+  } finally { platform.OS = 'ios'; }
+});
+
+test('other platforms preserve the caller scroll clipping preference', () => {
+  for (const os of ['ios', 'web']) {
+    platform.OS = os;
+    for (const removeClippedSubviews of [true, false, undefined]) {
+      assert.equal(mod.exports.TouchScrollView({ removeClippedSubviews }).props.removeClippedSubviews, removeClippedSubviews);
+    }
+  }
+  platform.OS = 'ios';
 });
