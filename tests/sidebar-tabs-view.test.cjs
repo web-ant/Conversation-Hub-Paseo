@@ -17,13 +17,13 @@ function harness(active=false) {
  const jsx=(type,props)=>({type,props:props||{}});
  const react={useState(value){const i=cursor++;if(!(i in states))states[i]=value;return[states[i],next=>{states[i]=typeof next==='function'?next(states[i]):next}]},useRef(value){const i=cursor++;if(!(i in states))states[i]={current:value};return states[i]},useEffect(fn){const i=cursor++;if(!(i in states)){states[i]=true;effects.push(fn)}}};
  const mod=load('../client/sidebar-tabs.tsx',{
-  react,'react/jsx-runtime':{jsx,jsxs:jsx},'react-native':{Modal:'Modal',ScrollView:'ScrollView',Text:'Text',View:'View'},
+  './density':require('./appearance-fixture.cjs'),react,'react/jsx-runtime':{jsx,jsxs:jsx},'react-native':{Modal:'Modal',ScrollView:'ScrollView',Text:'Text',View:'View'},
   '@getpaseo/plugin/client/ui':{TextInput:'TextInput'},
   '@getpaseo/plugin/client':{useSettings:()=>settings,useRpc:()=>async()=>({hostId:'local'}),useAgents:()=>[],useHosts:()=>[],useAgent:()=>null},
   '../shared/settings':{sidebarTabs:{}},'../shared/host-context':{hostContext:{}},'../shared/model':organizationModel,'../shared/sidebar-tabs':tabsModel,
   './dropdown-menu':{DropdownMenu:'DropdownMenu'},'./visuals':{FeedbackPressable:'Pressable',Glyph:'Glyph'},'./i18n':{t:(s,...a)=>s.replace(/\{(\d)\}/g,(_,i)=>String(a[i])),timeLabel:s=>s,useAppLanguage(){}},'./view-state':{useViewState:()=>null},
  });
- function render(){cursor=0;tree=mod.SidebarTabsView({view:{theme:{colors:{}},layout:{compact:false}},children(next,items){scope=next;controls=items;return jsx('Content',{})}})}
+ function render(){cursor=0;tree=mod.SidebarTabsView({view:{theme:{colors:{}},active:{agent:null,workspace:null},layout:{compact:false}},children(next,items){scope=next;controls=items;return jsx('Content',{})}})}
  function nodes(node,out=[]){if(Array.isArray(node))node.forEach(child=>nodes(child,out));else if(node&&typeof node==='object'){out.push(node);nodes(node.props?.children,out)}return out}
  function find(label){return nodes(tree).find(node=>node.props.accessibilityLabel===label)}
  function press(label){const node=find(label);assert.ok(node,label);if(!node.props.disabled)node.props.onPress();render()}
@@ -64,7 +64,7 @@ test('custom tab label and close use one shared hover surface', async()=>{
 test('tab surface highlights label and close together and clears hover without losing selection',()=>{
  let cursor=0;const states=[];const jsx=(type,props)=>({type,props:props||{}});
  const mod=load('../client/sidebar-tabs.tsx',{
-  react:{useState(value){const i=cursor++;if(!(i in states))states[i]=value;return[states[i],next=>states[i]=next]},useEffect(){},useRef:()=>({})},
+  './density':require('./appearance-fixture.cjs'),react:{useState(value){const i=cursor++;if(!(i in states))states[i]=value;return[states[i],next=>states[i]=next]},useEffect(){},useRef:()=>({})},
   'react/jsx-runtime':{jsx,jsxs:jsx},'react-native':{View:'View',Animated:{View:'AnimatedView'},Platform:{OS:'web'}},
   '@getpaseo/plugin/client':{},'@getpaseo/plugin/client/ui':{},'../shared/settings':{},'../shared/host-context':{},'../shared/model':{},'../shared/sidebar-tabs':{},'./dropdown-menu':{},'./visuals':{useMotion:target=>target},'./i18n':{t:(s,...a)=>s.replace(/\{(\d)\}/g,(_,i)=>String(a[i])),timeLabel:s=>s,useAppLanguage(){}},'./view-state':{useViewState:()=>null},
  });

@@ -1,3 +1,4 @@
+import {useSidebarMetrics} from './density';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, Modal, Platform, ScrollView, Text, View, type ViewProps } from 'react-native';
 import { useAgent, useAgents, useHosts, useRpc, useSettings, type AgentRef, type PluginSidebarViewProps } from '@getpaseo/plugin/client';
@@ -67,20 +68,30 @@ export function SidebarTabsView({ view, children }: {view:PluginSidebarViewProps
   const tabPositions=useRef<Record<string,number>>({});
   const [menuAnchor,setMenuAnchor]=useState<DropdownAnchor|null>(null);
   const local=useViewState();
+  const {followActiveChat}=useSidebarMetrics();
+  const followed=useRef('');
   const shared:SidebarTabs = settings.status==='ready'?settings.values:{enabled:true,activeId:'all',tabs:[]};
   // The selected tab belongs to this device: switching tabs on the phone must not switch the desktop.
   const state:SidebarTabs = {...shared,activeId:local?.activeTab??shared.activeId};
   const select=(id:string)=>{if(local)local.setActiveTab(id);else void save({...state,activeId:id})};
   const active=state.enabled?state.tabs.find(tab=>tab.id===state.activeId&&tab.open):undefined;
+  useEffect(()=>{
+    if(!followActiveChat){followed.current='';return;}
+    const key=view.active.agent?.key;
+    if(!key){followed.current='';return;}
+    if(settings.status!=='ready'||followed.current===key)return;
+    followed.current=key;
+    if(active&&!active.members.some(member=>member.hostId===view.active.agent!.hostId&&member.agentId===view.active.agent!.id))select('all');
+  },[view.active.agent?.key,followActiveChat,settings.status]);
   useEffect(()=>{tabScroll.current?.scrollTo({x:Math.max(0,(tabPositions.current[active?.id || 'all'] || 0)-24),animated:false})},[active?.id,state.enabled,state.tabs.length]);
   const agents=useAgents({where:agent=>!memberSearch.trim()||(agent.title||'Untitled conversation').toLocaleLowerCase().includes(memberSearch.trim().toLocaleLowerCase()),orderBy:'title'});
   const c=view.theme.colors;
   async function save(next:SidebarTabs,revision?:string) {
     if(settings.status!=='ready'||pending.current)return false;
-    if(revision && revision!==settings.revision){setError('The tabs changed on another client. Close this editor and try again.');return false;}
+    if(revision && revision!==settings.revision){setError(t('The tabs changed on another client. Close this editor and try again.'));return false;}
     pending.current=true;setSaving(true);setError(null);
-    try{const ok=await settings.save(next,settings.revision);if(!ok)setError('Could not save tabs. Refresh and try again.');else local?.setActiveTab(next.activeId);return ok;}
-    catch{setError('Could not save tabs. Check the host connection.');return false;}
+    try{const ok=await settings.save(next,settings.revision);if(!ok)setError(t('Could not save tabs. Refresh and try again.'));else local?.setActiveTab(next.activeId);return ok;}
+    catch{setError(t('Could not save tabs. Check the host connection.'));return false;}
     finally{pending.current=false;setSaving(false);}
   }
   const resetDialog=()=>{if(!pending.current){setDialog(null);setError(null)}};
@@ -108,36 +119,36 @@ export function SidebarTabsView({ view, children }: {view:PluginSidebarViewProps
   const disabled=saving||settings.status!=='ready';
   return <View style={{flex:1,minWidth:0}}>
     {state.enabled&&state.tabs.some(tab=>tab.open)&&<View style={{flexDirection:'row',alignItems:'center',gap:2,paddingHorizontal:8,paddingTop:4,minWidth:0}}>
-      {<ScrollView ref={tabScroll} horizontal accessibilityLabel="Custom tabs" showsHorizontalScrollIndicator={false} style={{flex:1,minWidth:0,flexGrow:1}} contentContainerStyle={{alignItems:'center',gap:2}}>
+      {<ScrollView ref={tabScroll} horizontal accessibilityLabel={t("Custom tabs")} showsHorizontalScrollIndicator={false} style={{flex:1,minWidth:0,flexGrow:1}} contentContainerStyle={{alignItems:'center',gap:2}}>
         <SidebarTabSurface selected={!active} disabled={disabled} view={view}>
-          <FeedbackPressable theme={view.theme} hoverBackground="transparent" accessibilityRole="tab" accessibilityLabel="Select tab All" accessibilityState={{selected:!active,disabled}} disabled={disabled} onPress={()=>select('all')} style={{minHeight:view.layout.compact?44:30,paddingHorizontal:10,justifyContent:'center',backgroundColor:'transparent'}}><Text style={{color:!active?c.foreground:c.foregroundMuted,fontSize:12}}>{t('All')}</Text></FeedbackPressable>
+          <FeedbackPressable theme={view.theme} hoverBackground="transparent" accessibilityRole="tab" accessibilityLabel={t("Select tab All")} accessibilityState={{selected:!active,disabled}} disabled={disabled} onPress={()=>select('all')} style={{minHeight:view.layout.compact?44:30,paddingHorizontal:10,justifyContent:'center',backgroundColor:'transparent'}}><Text style={{color:!active?c.foreground:c.foregroundMuted,fontSize:12}}>{t('All')}</Text></FeedbackPressable>
         </SidebarTabSurface>
         {state.tabs.filter(tab=>tab.open).map(tab=><SidebarTabSurface key={tab.id} selected={active?.id===tab.id} disabled={disabled} view={view} limited onLayout={event=>{tabPositions.current[tab.id]=event.nativeEvent.layout.x;if(active?.id===tab.id)tabScroll.current?.scrollTo({x:Math.max(0,event.nativeEvent.layout.x-24),animated:false})}}>
           <FeedbackPressable theme={view.theme} hoverBackground="transparent" accessibilityRole="tab" accessibilityLabel={`Select tab ${tab.name}`} accessibilityState={{selected:active?.id===tab.id,disabled}} disabled={disabled} onPress={()=>select(tab.id)} style={{minHeight:view.layout.compact?44:30,paddingLeft:10,paddingRight:4,justifyContent:'center',minWidth:0,flexShrink:1,backgroundColor:'transparent'}}><Text numberOfLines={1} style={{color:active?.id===tab.id?c.foreground:c.foregroundMuted,fontSize:12}}>{tab.name}</Text></FeedbackPressable>
           <FeedbackPressable theme={view.theme} hoverBackground="transparent" accessibilityRole="button" accessibilityLabel={`Close tab ${tab.name}`} disabled={disabled} onPress={()=>{void save(closeSidebarTab(state,tab.id))}} style={{width:view.layout.compact?32:24,minHeight:view.layout.compact?44:30,flexShrink:0,alignItems:'center',justifyContent:'center',backgroundColor:'transparent'}}><Glyph name="close" size={11} color={c.foregroundMuted}/></FeedbackPressable>
         </SidebarTabSurface>)}
       </ScrollView>}
-      {state.enabled&&<FeedbackPressable theme={view.theme} disabled={disabled} accessibilityRole="button" accessibilityLabel="New tab" onPress={openNew} style={{width:view.layout.compact?36:28,minHeight:view.layout.compact?44:30,justifyContent:'center',alignItems:'center'}}><Glyph name="plus" size={13} color={c.foregroundMuted}/></FeedbackPressable>}
-      {active&&<FeedbackPressable theme={view.theme} disabled={disabled} accessibilityRole="button" accessibilityLabel="Choose conversations for tab" onPress={openMembers} style={{width:view.layout.compact?36:28,minHeight:view.layout.compact?44:30,justifyContent:'center',alignItems:'center'}}><Glyph name="conversations" size={13} color={c.foregroundMuted}/></FeedbackPressable>}
-      <FeedbackPressable focusRef={menuRef} theme={view.theme} disabled={disabled} accessibilityRole="button" accessibilityLabel="Custom tab options" onPress={()=>menuRef.current?.measureInWindow((x,y,width,height)=>setMenuAnchor({right:x+width,top:y+height+4}))} style={{width:view.layout.compact?36:28,minHeight:view.layout.compact?44:30,justifyContent:'center',alignItems:'center'}}><Glyph name="moreVertical" size={13} color={c.foregroundMuted}/></FeedbackPressable>
+      {state.enabled&&<FeedbackPressable theme={view.theme} disabled={disabled} accessibilityRole="button" accessibilityLabel={t("New tab")} onPress={openNew} style={{width:view.layout.compact?36:28,minHeight:view.layout.compact?44:30,justifyContent:'center',alignItems:'center'}}><Glyph name="plus" size={13} color={c.foregroundMuted}/></FeedbackPressable>}
+      {active&&<FeedbackPressable theme={view.theme} disabled={disabled} accessibilityRole="button" accessibilityLabel={t("Choose conversations for tab")} onPress={openMembers} style={{width:view.layout.compact?36:28,minHeight:view.layout.compact?44:30,justifyContent:'center',alignItems:'center'}}><Glyph name="conversations" size={13} color={c.foregroundMuted}/></FeedbackPressable>}
+      <FeedbackPressable focusRef={menuRef} theme={view.theme} disabled={disabled} accessibilityRole="button" accessibilityLabel={t("Custom tab options")} onPress={()=>menuRef.current?.measureInWindow((x,y,width,height)=>setMenuAnchor({right:x+width,top:y+height+4}))} style={{width:view.layout.compact?36:28,minHeight:view.layout.compact?44:30,justifyContent:'center',alignItems:'center'}}><Glyph name="moreVertical" size={13} color={c.foregroundMuted}/></FeedbackPressable>
     </View>}
     <DropdownMenu anchor={menuAnchor} items={menu} view={view} close={()=>setMenuAnchor(null)} busy={saving} error={error}/>
-    {error&&!dialog&&<Text accessibilityRole="alert" style={{color:c.statusDanger,fontSize:11,padding:8}}>{error}</Text>}
+    {error&&!dialog&&<Text accessibilityRole="alert" style={{color:c.statusDanger,fontSize:11,padding:8}}>{error ? t(error) : null}</Text>}
     {settings.status==='ready'&&(!active||ownerHost)?children(active?{tab:active,revision:settings.revision,saving,error,saveOrganization:(values,revision,hosts)=>saveTab({organization:values,...(hosts?{hosts}:{})},revision),saveHosts:(values,revision)=>saveTab({hosts:values.hosts},revision),openMembers}:undefined,{enabled:state.enabled,saving,items:menu}):<Text style={{color:c.foregroundMuted,padding:12}}>{settings.status==='error'||settings.status==='invalid'?settings.error:hostError||t('Loading…')}</Text>}
     <Modal transparent visible={dialog!==null} animationType="fade" onRequestClose={resetDialog}>
       <View style={{flex:1,justifyContent:'center',alignItems:'center',padding:16,backgroundColor:'rgba(0,0,0,0.35)'}} {...{onKeyDown:(event:{key:string;stopPropagation():void})=>{if(event.key==='Escape'){event.stopPropagation();resetDialog()}}}}>
-      <View role="dialog" accessibilityLabel="Tab editor" accessibilityViewIsModal style={{width:'100%',maxWidth:420,maxHeight:'90%',borderRadius:10,backgroundColor:c.surface0,borderWidth:1,borderColor:c.border,padding:16}}>
+      <View role="dialog" accessibilityLabel={t("Tab editor")} accessibilityViewIsModal style={{width:'100%',maxWidth:420,maxHeight:'90%',borderRadius:10,backgroundColor:c.surface0,borderWidth:1,borderColor:c.border,padding:16}}>
       <Text style={{color:c.foreground,fontSize:15,fontWeight:'600',marginBottom:16}}>{dialog==='members'?t('Choose conversations'):dialog==='rename'?t('Rename tab'):t('New tab')}</Text>
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{gap:12}}>
         {dialog==='members'?<>
           <Text style={{color:c.foregroundMuted,fontSize:12}}>{t('Choose existing conversations for this tab. They stay on their original servers.')}</Text>
-          <TextInput accessibilityLabel="Search tab conversations" value={memberSearch} onChangeText={setMemberSearch} placeholder={t('Search conversations…')} placeholderTextColor={c.foregroundMuted} style={{color:c.foreground,minHeight:40,padding:8,backgroundColor:c.surface1,borderRadius:5}}/>
+          <TextInput accessibilityLabel={t("Search tab conversations")} value={memberSearch} onChangeText={setMemberSearch} placeholder={t('Search conversations…')} placeholderTextColor={c.foregroundMuted} style={{color:c.foreground,minHeight:40,padding:8,backgroundColor:c.surface1,borderRadius:5}}/>
           <View style={{maxHeight:300}}><ScrollView keyboardShouldPersistTaps="handled">{agents.map(reference=><MemberChoice key={reference.key} reference={reference} view={view} disabled={saving} checked={memberDraft.some(member=>member.hostId===reference.hostId&&member.agentId===reference.id)} toggle={()=>setMemberDraft(previous=>previous.some(member=>member.hostId===reference.hostId&&member.agentId===reference.id)?previous.filter(member=>member.hostId!==reference.hostId||member.agentId!==reference.id):[...previous,{hostId:reference.hostId,agentId:reference.id}])}/>)}</ScrollView></View>
-        </>:<TextInput autoFocus accessibilityLabel="Tab name" value={draft} onChangeText={value=>{setDraft(value);setError(null)}} maxLength={40} editable={!saving} placeholder={t('Tab name…')} placeholderTextColor={c.foregroundMuted} onSubmitEditing={()=>{if(draft.trim())void submit()}} style={{color:c.foreground,minHeight:40,padding:8,backgroundColor:c.surface1,borderRadius:5}}/>}
-        {error&&<Text accessibilityRole="alert" style={{color:c.statusDanger,fontSize:12}}>{error}</Text>}
+        </>:<TextInput autoFocus accessibilityLabel={t("Tab name")} value={draft} onChangeText={value=>{setDraft(value);setError(null)}} maxLength={40} editable={!saving} placeholder={t('Tab name…')} placeholderTextColor={c.foregroundMuted} onSubmitEditing={()=>{if(draft.trim())void submit()}} style={{color:c.foreground,minHeight:40,padding:8,backgroundColor:c.surface1,borderRadius:5}}/>}
+        {error&&<Text accessibilityRole="alert" style={{color:c.statusDanger,fontSize:12}}>{error ? t(error) : null}</Text>}
         <View style={{flexDirection:'row',justifyContent:'flex-end',gap:8}}>
-          <FeedbackPressable theme={view.theme} disabled={saving} accessibilityLabel="Cancel tab editor" onPress={resetDialog} style={{padding:10}}><Text style={{color:c.foregroundMuted}}>{t('Cancel')}</Text></FeedbackPressable>
-          <FeedbackPressable theme={view.theme} disabled={saving||(dialog!=='members'&&!draft.trim())} accessibilityLabel="Save tab" accessibilityState={{busy:saving}} onPress={()=>{void submit()}} style={{padding:10,backgroundColor:c.surface2,borderRadius:5}}><Text style={{color:c.foreground}}>{saving?t('Saving…'):dialog==='new'?t('Create'):t('Save')}</Text></FeedbackPressable>
+          <FeedbackPressable theme={view.theme} disabled={saving} accessibilityLabel={t("Cancel tab editor")} onPress={resetDialog} style={{padding:10}}><Text style={{color:c.foregroundMuted}}>{t('Cancel')}</Text></FeedbackPressable>
+          <FeedbackPressable theme={view.theme} disabled={saving||(dialog!=='members'&&!draft.trim())} accessibilityLabel={t("Save tab")} accessibilityState={{busy:saving}} onPress={()=>{void submit()}} style={{padding:10,backgroundColor:c.surface2,borderRadius:5}}><Text style={{color:c.foreground}}>{saving?t('Saving…'):dialog==='new'?t('Create'):t('Save')}</Text></FeedbackPressable>
         </View>
       </ScrollView></View></View>
     </Modal>

@@ -1,4 +1,35 @@
 import { Linking, Platform } from 'react-native';
+
+/** Tooltips live in body, so copy the sidebar text font instead of inheriting body's font. */
+function tooltipFont(source: any, browser: any): string {
+  const text = source.querySelector?.('[dir="auto"], input, textarea')
+    ?? source.parentElement?.querySelector('[dir="auto"], input, textarea');
+  return browser.getComputedStyle(text ?? source).fontFamily || 'system-ui, sans-serif';
+}
+
+/** Small host-document hint; it cannot capture input or be clipped by the sidebar. */
+export function showButtonTooltip(element: unknown, label: string, colors: { surface1: string; border: string; foreground: string }) {
+  if (Platform.OS !== 'web') return () => {};
+  const source = element as { ownerDocument?: any; getBoundingClientRect?(): any } | null;
+  const document = source?.ownerDocument, browser = document?.defaultView;
+  if (!browser || !source?.getBoundingClientRect || document.querySelector('[role="menu"], [role="dialog"]')) return () => {};
+  const hint = document.createElement('div');
+  hint.setAttribute('role', 'tooltip');
+  hint.setAttribute('aria-label', label);
+  hint.textContent = label;
+  Object.assign(hint.style, { position: 'fixed', zIndex: '10000', pointerEvents: 'none', boxSizing: 'border-box', maxWidth: `${Math.max(1, browser.innerWidth - 16)}px`, padding: '6px 9px', borderRadius: '6px', border: `1px solid ${colors.border}`, background: colors.surface1, color: colors.foreground, fontFamily: tooltipFont(source, browser), fontSize: '12px', lineHeight: '16px', boxShadow: '0 3px 10px rgba(0,0,0,.14)' });
+  document.body.appendChild(hint);
+  const box = source.getBoundingClientRect(), bounds = hint.getBoundingClientRect();
+  const top = box.bottom + 6 + bounds.height <= browser.innerHeight - 8 ? box.bottom + 6 : box.top - bounds.height - 6;
+  Object.assign(hint.style, { left: `${Math.max(8, Math.min(box.left + (box.width - bounds.width) / 2, browser.innerWidth - bounds.width - 8))}px`, top: `${Math.max(8, top)}px` });
+  const remove = () => hint.remove();
+  const observer = new browser.MutationObserver(() => { if (document.querySelector('[role="menu"], [role="dialog"]')) remove(); });
+  observer.observe(document.body, { childList: true, subtree: true });
+  browser.addEventListener('scroll', remove, true);
+  browser.addEventListener('resize', remove);
+  return () => { remove(); observer.disconnect(); browser.removeEventListener('scroll', remove, true); browser.removeEventListener('resize', remove); };
+}
+
 /** Non-interactive host-document tooltip; never captures pointer or keyboard input. */
 export function showConversationTooltip(element: unknown, data: {title:string; host:string; path?:string}, colors: {surface1:string; border:string; foreground:string; foregroundMuted:string}) {
   if (Platform.OS !== 'web') return () => {};
@@ -11,7 +42,7 @@ export function showConversationTooltip(element: unknown, data: {title:string; h
   card.setAttribute('role','tooltip');
   card.setAttribute('aria-label','Conversation details');
   const width = Math.min(360,browser.innerWidth-16);
-  Object.assign(card.style,{position:'fixed',zIndex:'10000',pointerEvents:'none',boxSizing:'border-box',width:`${width}px`,padding:'12px',borderRadius:'8px',border:`1px solid ${colors.border}`,background:colors.surface1,color:colors.foreground,fontFamily:'inherit',fontSize:'12px',lineHeight:'20px',boxShadow:'0 4px 16px rgba(0,0,0,.14)'});
+  Object.assign(card.style,{position:'fixed',zIndex:'10000',pointerEvents:'none',boxSizing:'border-box',width:`${width}px`,padding:'12px',borderRadius:'8px',border:`1px solid ${colors.border}`,background:colors.surface1,color:colors.foreground,fontFamily:tooltipFont(source,browser),fontSize:'12px',lineHeight:'20px',boxShadow:'0 4px 16px rgba(0,0,0,.14)'});
   const heading = document.createElement('div'); heading.textContent=data.title;
   Object.assign(heading.style,{fontSize:'13px',marginBottom:'4px',overflowWrap:'anywhere'});card.appendChild(heading);
   const icons = {server:'M3 3h18v7H3ZM3 14h18v7H3ZM7 6h.01M7 17h.01',folder:'M3 7V5h6l2 2h10v13H3Z'};

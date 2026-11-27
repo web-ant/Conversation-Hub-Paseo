@@ -31,10 +31,10 @@ test('subtasks fold under a listed parent but search and status filters still fi
  assert.equal(matchesConversation(child,{...defaults,parents,filter:'attention'}),true);
 });
 
-test('a pinned conversation leaves the lists below while search and status filters still find it',()=>{
+test('a pinned conversation stays in its original folder and project lists as well as pinned',()=>{
  const item=agent('x','Release plan','2026-01-03','2026-02-03','closed',false,null);
  const pinned=new Set([item.hostId+':'+item.id]);
- assert.equal(matchesConversation(item,{...defaults,pinned}),false);
+ assert.equal(matchesConversation(item,{...defaults,pinned}),true);
  assert.equal(matchesConversation(item,{...defaults,pinned,search:'release'}),true);
  assert.equal(matchesConversation(item,{...defaults,pinned:new Set()}),true);
 });

@@ -5,7 +5,7 @@ const ts = require('typescript');
 function harness(status = 'online') {
   let cursor = 0, states = [], tree, calls = [], resolveOpen, rejectOpen;
   const jsx = (type, props) => ({ type, props: props || {} });
-  const imports = { './i18n':{t:(s,...a)=>s.replace(/\{(\d)\}/g,(_,i)=>String(a[i])),timeLabel:s=>s,useAppLanguage(){}},'./view-state':(()=>{const open=new Map();let collapsed=false,before=new Map();const api={isOpen:(k,f)=>open.has(k)?open.get(k):f,setOpen:(k,v)=>open.set(k,v),register:()=>()=>{},showAll:()=>false,setShowAll(){},activeTab:null,setActiveTab(){},titleLines:null,setTitleLines(n){api.titleLines=n},get collapsed(){return collapsed},toggleCollapseAll(extra=[]){if(collapsed){open.clear();before.forEach((v,k)=>open.set(k,v))}else{before=new Map(open);extra.forEach(k=>open.set(k,false))}collapsed=!collapsed}};return{ViewStateProvider:'ViewStateProvider',useViewState:()=>api,useBranchOpen:(k,f=true)=>[api.isOpen(k,f),v=>api.setOpen(k,v)]}})(),'../shared/identity':{projectTile:()=>({color:'#368080',letter:'P'})}, './folder-add':{FolderAdd:'FolderAdd'}, './web': {isSidebarDragging:()=>false, touchMenu:v=>v.layout.platform!=='web'||v.layout.compact}, './folder-drag': {FolderDragProvider:'FolderDragProvider',DragFolderRow:'DragFolderRow',FolderDropTarget:'FolderDropTarget'},
+  const imports = {'./follow-chat':{FollowActiveChat:'FollowActiveChat',FollowChatProvider:'FollowChatProvider',FollowChatScrollView:'ScrollView',FollowRowScope:'FollowRowScope',useFollowChatRow:()=>({current:null})},'./folder-editor':{FolderEditor:'FolderEditor'},'../shared/popover':require('./folder-fixture.cjs'), './folder-actions':require('./folder-fixture.cjs'),'../shared/folder-view':require('./folder-fixture.cjs'), './density':require('./appearance-fixture.cjs'),'./i18n':{t:(s,...a)=>s.replace(/\{(\d)\}/g,(_,i)=>String(a[i])),timeLabel:s=>s,useAppLanguage(){}},'./view-state':(()=>{const open=new Map();let collapsed=false,before=new Map();const api={isOpen:(k,f)=>open.has(k)?open.get(k):f,setOpen:(k,v)=>open.set(k,v),register:()=>()=>{},showAll:()=>false,setShowAll(){},activeTab:null,setActiveTab(){},titleLines:null,setTitleLines(n){api.titleLines=n},get collapsed(){return collapsed},toggleCollapseAll(extra=[]){if(collapsed){open.clear();before.forEach((v,k)=>open.set(k,v))}else{before=new Map(open);extra.forEach(k=>open.set(k,false))}collapsed=!collapsed}};return{ViewStateProvider:'ViewStateProvider',useViewState:()=>api,useBranchOpen:(k,f=true)=>[api.isOpen(k,f),v=>api.setOpen(k,v)]}})(),'../shared/identity':{projectTile:()=>({color:'#368080',letter:'P'})}, './folder-add':{FolderAdd:'FolderAdd'}, './web': {isSidebarDragging:()=>false, touchMenu:v=>v.layout.platform!=='web'||v.layout.compact}, './folder-drag': {FolderDragProvider:'FolderDragProvider',DragFolderRow:'DragFolderRow',FolderDropTarget:'FolderDropTarget'},
     '../shared/status': {quietSubtask:()=>false,aggregateStates:()=>({state:'idle',hasUpdates:false})}, '../shared/model': {}, './drag-and-drop': {}, './touch-drag':{useTouchDrag:()=>null}, './steady':{useSteadyList:l=>l}, '../shared/activity':{timeBucket:()=>'older'}, './conversation-view': {useConversationView:()=>({options:{}})}, '../shared/conversations': {}, './context-menu': {}, './image-picker': {}, './visuals': { FeedbackPressable: 'Pressable', Glyph: 'Glyph', StatusMark: 'StatusMark', EntryReveal: 'EntryReveal' }, '../shared/settings': {},
     react: { useEffect() {}, useState(initial) { const i = cursor++; if (!(i in states)) states[i] = initial; return [states[i], next => { states[i] = typeof next === 'function' ? next(states[i]) : next; }]; }, useRef(value) { const i = cursor++; if (!(i in states)) states[i] = { current: value }; return states[i]; } },
     'react/jsx-runtime': { jsx, jsxs: jsx }, 'react-native': { View: 'View', Pressable: 'Pressable', Text: 'Text' }, '@getpaseo/plugin/client/ui': { TextInput: 'TextInput' },
@@ -22,32 +22,25 @@ function harness(status = 'online') {
   render();
   return {menu:()=>tree.props.menuActions,find,press,render,nodes,calls,reject:message=>rejectOpen(new Error(message)),resolve:value=>resolveOpen(value)};
 }
-test('host plus opens compact single-level entry and Escape dismisses it', () => {
-  const h=harness();h.press('New folder on MacBook');
-  const input=h.find('Folder name on MacBook');assert.ok(input);assert.equal(input.props.autoFocus,true);
-  assert.equal(h.find('Create folder').props.disabled,true);
-  input.props.onKeyPress({nativeEvent:{key:'Escape'}});h.render();assert.equal(h.find('Folder name on MacBook').props.editable,false);
-});
-test('arbitrary names save as host folders, duplicate requests are prevented and failures are reported', async () => {
-  const h=harness();h.press('New folder on MacBook');h.find('Folder name on MacBook').props.onChangeText('123123');h.render();
-  const submit=h.find('Create folder');submit.props.onPress();submit.props.onPress();h.render();
-  assert.equal(h.calls.length,1);assert.deepEqual(h.calls[0],{host:'remote',name:'123123'});
-  assert.equal(h.find('Creating folder').props.disabled,true);
-  h.reject('Save failed');await new Promise(resolve=>setImmediate(resolve));h.render();
-  assert.ok(h.nodes().some(n=>n.props.accessibilityRole==='alert'&&n.props.children==='Could not save. Check the server connection and try again.'));
-  h.find('Folder name on MacBook').props.onChangeText('/another');h.render();assert.ok(!h.nodes().some(n=>n.props.accessibilityRole==='alert'));
-});
-test('offline hosts cannot open project entry',()=>{const h=harness('offline');assert.equal(h.menu()[0].disabled,true);h.press('New folder on MacBook');assert.equal(h.find('Folder name on MacBook').props.editable,false);});
-
-test('successful arbitrary folder creation closes entry without opening a directory', async()=>{
- const h=harness();h.press('New folder on MacBook');h.find('Folder name on MacBook').props.onChangeText('我的项目 123123');h.render();h.press('Create folder');h.resolve(true);await new Promise(r=>setImmediate(r));h.render();assert.equal(h.find('Folder name on MacBook').props.editable,false);assert.deepEqual(h.calls,[{host:'remote',name:'我的项目 123123'}]);
-});
+test('host new-folder action delegates to the common folder modal',()=>{const h=harness();h.press('New folder on MacBook');assert.deepEqual(h.calls,[{host:'remote',name:undefined}]);assert.equal(h.find('Folder name on MacBook'),undefined)});
+test('offline host cannot request a new folder',()=>{const h=harness('offline');h.press('New folder on MacBook');assert.deepEqual(h.calls,[])});
 
 test('top-level folders render as siblings of host branches and stay out of host children',()=>{
  const jsx=(type,props)=>({type,props});const mod={exports:{}};
  const code=ts.transpileModule(fs.readFileSync(require.resolve('../client/automatic-tree.tsx'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
- new Function('require','exports',code)(name=>name==='react/jsx-runtime'?{jsx,jsxs:jsx}:name==='./conversation-view'?{ConversationViewContext:{Provider:'Provider'}}:{},mod.exports);
+ new Function('require','exports',code)(name=>name==='./i18n'?{t:s=>s}:name==='../shared/model'?{memberRef:(hostId,id)=>({hostId,id})}:name==='../shared/folder-view'?require('./folder-fixture.cjs'):name==='react/jsx-runtime'?{jsx,jsxs:jsx}:name==='./conversation-view'?{ConversationViewContext:{Provider:'Provider'}}:name==='../shared/conversations'?{defaultConversationOptions:{search:''}}:{},mod.exports);
  const groups=[{id:'root',name:'Root folder',topLevel:true,agentIds:[]},{id:'nested',name:'Host folder',agentIds:[]}];
  const tree=mod.exports.AutomaticTree({mode:'server-project',hosts:[{serverId:'local',label:'MacBook'}],view:{},row(){},createFolder(){},foldersForHost:()=>groups});
- const [hosts,roots]=tree.props.children;assert.equal(roots[0].props.group.id,'root');assert.deepEqual(hosts[0].props.groups.map(g=>g.id),['nested']);
+ const [hosts,roots]=tree.props.children.filter(Boolean);assert.equal(roots[0].props.group.id,'root');assert.deepEqual(hosts[0].props.groups.map(g=>g.id),['nested']);
+});
+
+test('automatic views retain pinned folders in their original host/project list',()=>{
+ const jsx=(type,props)=>({type,props}),mod={exports:{}};
+ const code=ts.transpileModule(fs.readFileSync(require.resolve('../client/automatic-tree.tsx'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
+ new Function('require','exports',code)(name=>name==='./i18n'?{t:s=>s}:name==='../shared/model'?{memberRef:(hostId,id)=>({hostId,id})}:name==='../shared/folder-view'?require('./folder-fixture.cjs'):name==='react/jsx-runtime'?{jsx,jsxs:jsx}:name==='./conversation-view'?{ConversationViewContext:{Provider:'Provider'}}:name==='../shared/conversations'?{defaultConversationOptions:{search:''}}:{},mod.exports);
+ const groups=[{id:'root',name:'Root',pinned:true,topLevel:true,agentIds:['chat']},{id:'child',parentId:'root',name:'Child',pinned:true,agentIds:[]}];
+ const tree=mod.exports.AutomaticTree({mode:'server-project',hosts:[{serverId:'local',label:'Local'}],view:{theme:{colors:{}}},row(){},createFolder(){},foldersForHost:()=>groups});
+ const [favoriteSection,hosts,regularRoots]=tree.props.children;
+ assert.strictEqual(favoriteSection.props.children[1][0].props.children.props.group,groups[0]);assert.strictEqual(regularRoots[0].props.group,groups[0]);
+ assert.strictEqual(regularRoots[0].props.groups[1],groups[1]);assert.equal(hosts[0].props.groups.length,0);
 });

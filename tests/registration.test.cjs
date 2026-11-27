@@ -1,16 +1,13 @@
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const ts = require('typescript');
-test('registers the conversation folders sidebar view', () => {
-  const source = fs.readFileSync(require.resolve('../index.client.tsx'), 'utf8');
-  const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
-  const mod = { exports: {} }, registrations = [], removed = [];
-  new Function('require', 'exports', code)(name => name === './client/i18n' ? { messages: { message: key => key } } : (assert.equal(name, './client/sidebar'), { SidebarWithTabs: 'Sidebar' }), mod.exports);
-  const client = { addSidebarView: contribution => { registrations.push(contribution); return () => removed.push(contribution.id); } };
-  const cleanup = mod.exports.default(client);
-  assert.equal(registrations.length, 1);
-  assert.equal(registrations[0].id, 'folders');
-  assert.equal(registrations[0].Component, 'Sidebar');
-  cleanup(); assert.deepEqual(removed, ['folders']);
+const {test}=require('node:test');const assert=require('node:assert/strict'),fs=require('node:fs'),ts=require('typescript');
+test('registers settings and the existing sidebar ID, and cleans both up',async()=>{
+ const code=ts.transpileModule(fs.readFileSync(require.resolve('../index.client.tsx'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
+ const mod={exports:{}},registrations=[],removed=[];
+ const imports={'react/jsx-runtime':{jsx:(type,props)=>({type,props})},'./client/i18n':{messages:{message:k=>k}},'./client/sidebar':{SidebarWithTabs:'Sidebar'},'./client/settings-screen':{AppearanceSettings:'Settings',ConversationHubIcon:'BrandIcon'},'./client/density':{ViewActionsContext:{Provider:'Provider'}}};
+ new Function('require','exports',code)(n=>{assert.ok(n in imports,n);return imports[n]},mod.exports);
+ const add=contribution=>{registrations.push(contribution);return()=>removed.push(contribution.id)};
+ const cleanup=mod.exports.default({addSettingsScreen:add,addSidebarView:add,openSettings(){}});
+ assert.deepEqual(registrations.map(x=>x.id),['appearance','folders']);
+ assert.equal(registrations[0].icon,'BrandIcon');
+ assert.equal(registrations[1].Component({}).props.children.type,'Sidebar');
+ await cleanup();assert.deepEqual(removed,['appearance','folders']);
 });

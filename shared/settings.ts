@@ -4,11 +4,12 @@ export const organization = defineSettings({
   id: 'organization', scope: 'host', version: 1,
   schema: z.object({
     mode: z.enum(['folders', 'dividers']).default('folders'),
-    groups: z.array(z.object({ id: z.string(), parentId: z.string().optional(), topLevel: z.boolean().optional(), projectKey: z.string().optional(), name: z.string().trim().min(1).max(60), agentIds: z.array(z.string()) })).default([]),
+    groups: z.array(z.object({ id: z.string(), parentId: z.string().optional(), topLevel: z.boolean().optional(), projectKey: z.string().optional(), name: z.string().trim().min(1).max(60), icon: z.string().min(1).max(80).optional(), color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(), pinned: z.boolean().optional(), workspacePaths:z.array(z.string().min(1).max(4096)).max(64).optional(), agentIds: z.array(z.string()) })).default([]),
     ungroupedOrder: z.array(z.string()).default([]),
     assignments: z.array(z.object({ hostId: z.string(), agentId: z.string(), folderHostId: z.string(), groupId: z.string().nullable(), beforeId: z.string().optional(), beforeHostId: z.string().optional() })).optional(),
   }),
 });
+export const workspaceRouting=defineSettings({id:'workspace-routing',scope:'host',version:1,schema:z.object({enabled:z.boolean().default(true),includeSubdirectories:z.boolean().default(true),includeWorktrees:z.boolean().default(true),includeSubagents:z.boolean().default(false)})});
 
 // Additional hosts are namespaced inside this installation; legacy groups stay untouched.
 export const hostOrganizations = defineSettings({
@@ -27,6 +28,10 @@ export const displayPreferences = defineSettings({
     multilineTitles: z.boolean().default(false),
     sortBy: z.enum(['activity', 'created', 'title', 'manual']).default('activity'),
     sortDirection: z.enum(['asc', 'desc']).default('desc'),
+    showRecent: z.boolean().default(true),
+    recentLimit: z.number().int().min(1).max(30).default(10),
+    folderSortBy: z.enum(['manual', 'title', 'activity']).default('manual'),
+    folderSortDirection: z.enum(['asc', 'desc']).default('asc'),
     loadingColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#4F86F7'),
     loadingEffect: z.enum(['spinner', 'orbit', 'pulse', 'dots', 'bars']).default('spinner'),
     showBackground: z.boolean().default(true),

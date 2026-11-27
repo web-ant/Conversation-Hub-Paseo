@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Platform, Pressable, View, Image, Text } from 'react-native';
 import { Icon } from '@getpaseo/plugin/client/ui';
@@ -57,8 +58,17 @@ export function useMotion(target: number) {
   }, [value, target]);
   return value;
 }
-// Animate only the clip height. Contents keep their size and opacity throughout.
 export function Reveal({ open, children }: { open: boolean; children: ReactNode }) {
+  // Android's scroll clipping and nested measured-height animations can keep
+  // invalidating each other's layout, especially for branches below the viewport.
+  // Let Yoga lay out the open tree at its natural height in a single commit.
+  // Keep children mounted so folding a parent preserves its nested view state.
+  if (Platform.OS === 'android') return <View pointerEvents={open ? 'auto' : 'none'} accessibilityElementsHidden={!open} importantForAccessibility={open ? 'auto' : 'no-hide-descendants'} style={{ minWidth: 0, display: open ? 'flex' : 'none' }}>{children}</View>;
+  return <AnimatedReveal open={open}>{children}</AnimatedReveal>;
+}
+
+// Animate only the clip height on other platforms. Contents retain their size.
+function AnimatedReveal({ open, children }: { open: boolean; children: ReactNode }) {
   const [height, setHeight] = useState(0);
   const progress = useMotion(open ? 1 : 0);
   return <Animated.View pointerEvents={open ? 'auto' : 'none'} accessibilityElementsHidden={!open} importantForAccessibility={open ? 'auto' : 'no-hide-descendants'} style={{ minWidth: 0, overflow: 'hidden', height: height ? progress.interpolate({ inputRange: [0, 1], outputRange: [0, height] }) : open ? undefined : 0 }}>
@@ -121,7 +131,7 @@ export function BranchIcon({ state, hasUpdates = false, open, icon, image, color
   const busy = !tile && ['running','initializing','connecting'].includes(state || '');
   return <View style={{ width: 16, height: 16, position: 'relative', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
     {busy ? <StatusMark state={state!} theme={theme} loadingColor={loadingColor} loadingEffect={loadingEffect} /> : image ? <BranchImage uri={image} /> : tile ? <View style={{ width: 16, height: 16, borderRadius: 4, backgroundColor: tile.color, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: '#ffffff', fontSize: 10, lineHeight: 12, fontWeight: '600' }}>{tile.letter}</Text></View> : <Glyph name={icon} color={color || theme.colors.foregroundMuted} />}
-    {!open && hasUpdates && <View accessibilityLabel="Updates in collapsed group" style={{ position: 'absolute', right: -3, bottom: -2, width: 7, height: 7, borderRadius: 4, backgroundColor: theme.colors.statusSuccess, borderWidth: 1, borderColor: theme.colors.surface0 }} />}
+    {!open && hasUpdates && <View accessibilityLabel={t("Updates in collapsed group")} style={{ position: 'absolute', right: -3, bottom: -2, width: 7, height: 7, borderRadius: 4, backgroundColor: theme.colors.statusSuccess, borderWidth: 1, borderColor: theme.colors.surface0 }} />}
   </View>;
 }
 function BranchImage({ uri }: { uri: string }) { return <Image source={{ uri }} style={{ width: 16, height: 16, borderRadius: 3 }} />; }
@@ -133,7 +143,7 @@ export function EntryReveal({ open, height, children }: { open: boolean; height:
 }
 
 /** Local button feedback using the host palette; keeps native press and keyboard behavior. */
-export function FeedbackPressable({ theme, style, disabled, onHoverIn, onHoverOut, onFocus, onBlur, focusRef, hoverBackground, ...props }: import('react-native').PressableProps & { theme: import('@getpaseo/plugin/client').PluginSidebarViewProps['theme']; focusRef?: import('react').Ref<View>; hoverBackground?: string }) {
+export function FeedbackPressable({ theme, style, disabled, onHoverIn, onHoverOut, onFocus, onBlur, focusRef, hoverBackground, pressedBackground, ...props }: import('react-native').PressableProps & { theme: import('@getpaseo/plugin/client').PluginSidebarViewProps['theme']; focusRef?: import('react').Ref<View>; hoverBackground?: string; pressedBackground?: string }) {
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const c = theme.colors;
@@ -145,7 +155,7 @@ export function FeedbackPressable({ theme, style, disabled, onHoverIn, onHoverOu
     style={state => {
       const base = typeof style === 'function' ? style(state) : style;
       return [base, { borderRadius: 5, ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}) } as import('react-native').ViewStyle, !disabled && (hovered || focused || state.pressed) && {
-        backgroundColor: hoverBackground === 'transparent' ? 'transparent' : state.pressed ? c.surface2 : hoverBackground || c.surface1,
+        backgroundColor: hoverBackground === 'transparent' ? 'transparent' : state.pressed ? pressedBackground || c.surface2 : hoverBackground || c.surface1,
       }, !disabled && focused && Platform.OS === 'web' && { outlineStyle: 'solid', outlineWidth: 1, outlineOffset: -1, outlineColor: c.foregroundMuted } as import('react-native').ViewStyle];
     }} />;
 }

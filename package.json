@@ -1,10 +1,11 @@
 {
-  "name": "paseo-conversation-folders-plus",
+  "name": "paseo-conversation-hub",
   "private": false,
-  "version": "0.2.0-beta.1",
+  "version": "0.3.0",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/*.test.cjs"
+    "test": "node --test --test-isolation=none tests/*.test.cjs",
+    "sync-info": "node scripts/sync-plugin-info.cjs"
   },
   "devDependencies": {
     "@getpaseo/plugin": "0.17.3",
@@ -13,13 +14,14 @@
     "react": "19.1.0",
     "react-native": "0.81.5",
     "typescript": "^5.9.3",
-    "zod": "^4.4.3"
+    "zod": "^4.4.3",
+    "@getpaseo/client": "0.17.3"
   },
   "license": "MIT",
-  "description": "Organize existing Paseo conversations with folders, custom tabs, project grouping, and filters.",
+  "description": "Organize Paseo chats with nested folders, independent tabs, pins, recent activity, workspace directory rules, status filters, drag and drop, and a customizable sidebar.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xiaobaifly7/paseo-conversation-folders.git"
+    "url": "git+https://github.com/web-ant/Conversation-Hub-Paseo.git"
   },
   "files": [
     "paseo-plugin.json",
@@ -32,7 +34,16 @@
     "client/",
     "shared/",
     "server/",
-    "assets/screenshots/",
-    "LICENSE"
-  ]
+    "LICENSE",
+    "README.ru.md",
+    "assets/",
+    "scripts/sync-plugin-info.cjs"
+  ],
+  "homepage": "https://github.com/web-ant/Conversation-Hub-Paseo#readme",
+  "bugs": {
+    "url": "https://github.com/web-ant/Conversation-Hub-Paseo/issues"
+  },
+  "engines": {
+    "node": ">=24"
+  }
 }

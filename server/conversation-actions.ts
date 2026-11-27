@@ -4,6 +4,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import type { PluginHandlerContext } from '@getpaseo/plugin/server';
+import { LocalHost } from './local-host';
 
 // On Windows `paseo` is a .cmd shim: execFile cannot start it without a shell, and a shell would parse the title.
 // There, run the CLI bundled beside this plugin process with the same runtime, still without a shell.
@@ -46,8 +47,16 @@ export async function renameSourceConversation(input: {hostId:string;agentId:str
   if(!found || found.agent.id!==input.agentId) throw new Error('This conversation is no longer available.');
   const home=process.env.PASEO_HOME;
   if(!home) throw new Error('The daemon did not expose its home. Use the native conversation menu to rename.');
-  await runPaseo(['--home',home,'agent','update',input.agentId,'--name',title,'--json'], 'Could not rename conversation through the Paseo CLI. Check the source host connection.');
-  const updated=await paseo.agents.ref(input.agentId).refresh();
-  if(updated?.agent.title!==title) throw new Error('The host did not confirm the new conversation name. Try again.');
+  // The public agent handle has no title setter yet. Use the SDK's update operation
+  // against this daemon, rather than requiring a separate CLI executable on PATH.
+  const local = new LocalHost(home);
+  try {
+    const client = await local.client();
+    await client.updateAgent(found.agent.id, { name: title });
+    const updated=await paseo.agents.ref(input.agentId).refresh();
+    if(updated?.agent.title!==title) throw new Error('The host did not confirm the new conversation name. Try again.');
+  } finally {
+    await local.close();
+  }
   return {renamed:true,title};
 }

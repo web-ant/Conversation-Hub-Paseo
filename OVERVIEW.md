@@ -1,38 +1,67 @@
-# Conversation folders Plus for Paseo
+# Conversation Hub for Paseo
 
-Organize existing Paseo conversations with folders, separate tabs, and drag and drop.
+Conversation Hub turns Paseo’s sidebar into an organizer for existing conversations. Keep chats in folders and independent tabs, find recent work, see tasks needing attention, and automatically assign new conversations to folders by their workspace directory. Conversations retain their original host, workspace, history, and files.
 
-Based on [Conversation folders](https://github.com/Cocean001/paseo-conversation-folders) by Cocean001 (MIT). This edition adds a Recent list, Paseo-style project tiles, per-device fold state, Windows support for rename and delete, and Simplified Chinese.
+## Folders, projects, and tabs
 
-## Setup
+Create folders and one level of subfolders. The folder editor combines the name, icon, color, pin, and linked workspace directories. Choose from 1,858 Lucide icons with search or use an emoji. Pinned folders and conversations appear as additional shortcuts at the top while remaining in their original locations. Unpinning removes the shortcut; deleting a folder keeps its chats.
 
-Requires Paseo `>=0.16.0-beta.1 <0.18.0` on the daemon and clients.
+Drag conversations between folders or arrange them in a custom order. Folders can also be reordered or nested within the supported two levels. Project rows can be reordered without nesting. On touch screens, hold a row and move it; the list scrolls near its edges. To add several existing conversations, use a folder’s **+** and select them from **Current layout** or **Original sources**, grouped by server and workspace.
 
-Select **Conversation folders Plus** in **Settings → Sidebar → Sidebar view**. Paseo stores this choice per device, so select it in each desktop app, browser, and phone you use.
+Custom tabs contain their own folder structures and a selected set of existing conversations, including conversations from different hosts. Closing a tab preserves its contents; reopen it from **View options → Custom tabs**. The selected tab is remembered separately on each device.
 
-## Use
+Switch between custom folders, projects, servers, or servers with projects. Project appearance supports a display name, icon, emoji, color, and a PNG, JPEG, or WebP image up to 128 KB uploaded from desktop or web. Project names used for display do not rename directories. The **+** on a project starts a new conversation there.
 
-- The search box at the top filters conversations by title. While it has text and the host runs the Transcript Search plugin, **Search full transcripts for “…”** below it opens that plugin with the same query. **In progress** lists what is running, waiting for your approval, or finished but unread, across all projects; fold it from its heading.
-- **Pin conversation** in a conversation's menu keeps it in **Pinned** above everything else, newest pin first, on every device connected to the host. A pinned conversation leaves its project list until you unpin it; search and status filters still find it there.
-- When the sidebar is short (a small window, or many Paseo header and footer items), rows get denser: titles default to one line, **In progress** shows at most three rows when opened, and section headings shrink.
-- **In progress** starts folded to its heading (with its count) when lists are sorted by latest activity, since its conversations already sit at the top of their projects, and on short sidebars. Opening or folding it yourself is remembered per device, as is a title-line choice.
-- Subtasks a conversation starts are folded under it behind a count. A subtask appears in **In progress** only when it asks for permission, and the count turns amber when a subtask needs approval or failed. Search and status filters list subtasks directly.
-- Titles use two lines on desktop and one on phones; change it per device in **View options → Titles**. A title that opens with a pasted session id is shown without it; search still matches the id.
-- In the project view each project shows its latest ten conversations with **Show more** for the rest, and uses the same colored initial tile as Paseo’s own sidebar. Hover a project and press **+** to start a new conversation in it. When sorted by activity or creation time, a project's list is split into Today, Yesterday, Previous 7 days, Previous 30 days, and Older. Sorted by activity, running conversations stay on top in the order they were created, so they don't swap places every time one of them replies.
-- Create folders with the **New folder** button or a server’s **More → New folder…**. Folders support one level of children; deleting a folder keeps its conversations.
-- Drag conversations, folders, and projects to move or reorder them. On a phone, long-press a row and move your finger; the list scrolls when you reach its edge. Lists hold their order while you drag, even when running conversations update. Dropping a project on another project, or on that project's open list, reorders it and never nests it. Folder **+** lets you select conversations from **Current layout** or **Original sources** (server → workspace).
-- Create separate tabs from **View options → Custom tabs → New tab…**; the tab strip appears once a tab exists. Each tab has its own folders. Closing a tab keeps its contents; reopen it from the same menu.
-- Use **View options** for grouping, sorting, status, and display settings. **Collapse all → Restore expansion** restores the previous branch states.
-- A project’s **More** menu starts a new conversation or changes its display name, icon, emoji, color, or image. Images support PNG, JPEG, and WebP up to 128 KB on desktop and web.
-- Right-click a conversation, use **More**, or long-press on a phone and release without moving for rename, pin, labels, copy, archive, and deletion where available. Archive and deletion require confirmation; workspace actions affect the whole workspace.
-- The interface follows Paseo’s language setting. English and Simplified Chinese are included.
+## Recent work and status
 
-Folders, order, project appearance, and display settings are saved in Paseo’s plugin settings, shared by every connected client, and update live. Folded branches, **Show more**, title lines, and the selected tab are remembered on each device. Conversations keep their original server, workspace, and files. The plugin does not upload this information to an external service.
+**Pinned** keeps chosen conversations at hand. **Recent** shows conversations by actual last activity, excluding pinned conversations. Choose a limit of 5, 10, 15, 20, or 30, or hide the section. Recent and pinned entries remain in their folders and projects.
 
-## Limits
+**In progress** brings together running conversations, approval requests, and finished conversations with unread updates. Subtasks are folded beneath their parent conversation behind a count; approval requests and failures stand out. Search and status filters can show subtasks directly. Background helper agents hidden by Paseo are excluded.
 
-Conversation rename and permanent deletion run the Paseo CLI on the plugin host; on Windows the plugin runs the CLI bundled with the Paseo desktop app, without a shell. Use the source server’s native controls for remote conversations. Permanent deletion removes conversation history.
+Choose among five running indicators: spinner, orbit, pulse, three dots, and wave bars, with an adjustable color. Folder and project rows can show activity or updates even while folded. Status dots and folded-row indicators can be switched off independently.
 
-Background helper agents, which Paseo hides from its own lists, are not listed. Project tiles match Paseo’s colors for directory projects; a Git project with a remote can get a different color because plugins cannot read the remote.
+Conversation sorting supports last activity, creation time, title, or custom order. Folder sorting is independent: custom order, name, or last activity, ascending or descending. Folder activity includes conversations in subfolders; empty folders stay at the end of activity sorting. Dragging a folder enables custom folder order.
 
-Touch drag was checked in a phone-sized browser with simulated touch, not yet on a physical phone. In the manual folder view, reorder folders on a phone with **Move up**. Concurrent use of two real servers has not completed acceptance checks. Manual mark-as-unread and open-in-file-manager are unavailable through the current API.
+In project grouping, recent conversations load in batches with **Show more**, and activity or creation sorting separates them into time periods. Running conversations keep a stable relative order while replying. **Collapse all → Restore expansion** restores the previous branch states.
+
+## Search, navigation, and actions
+
+Search conversation titles and narrow results by status, host, project, or labels. When the host has the Transcript Search plugin, the search box offers a handoff using the same query for full-history search; this plugin itself searches titles.
+
+**Reveal the open conversation** expands its original folder and scrolls to its row while keeping keyboard focus in the composer. When the conversation is outside the selected custom tab, navigation returns to **All**. Search and filters are preserved, so a filtered-out conversation may remain hidden. Manual folding after navigation is respected until another chat is opened.
+
+Use right-click, the row’s **…** menu, or a touch hold without moving for available actions: rename a conversation or workspace, pin or unpin, edit workspace labels, copy the path or branch, archive a conversation, archive a workspace, or permanently delete a conversation. The menu remains accessible on recent and pinned rows in compact layouts. Archiving and deletion ask for confirmation; workspace actions apply to the workspace and its conversations.
+
+## Automatic folder assignment
+
+Link one or several directories or patterns in the folder editor. New workspaces and conversations are assigned on their host even when the sidebar is closed. Choose whether to include nested directories, Git worktrees using their original repository, or subprocesses. Subprocess assignment is off by default. Rules in custom tabs also add matching new conversations to the tab’s membership.
+
+Plain paths match complete directory boundaries. `*` matches within a directory name; `**` can cross directory boundaries. For example, `/projects/*` matches immediate child directories, `/projects/**` matches all depths, and `**recmeet**` matches paths containing `recmeet`. Rootless patterns can begin at any directory boundary. The nested-directory switch applies to plain paths; patterns define their own depth.
+
+Exact directory matches take priority. Other matches favor more literal text and fewer wildcards. Equally specific matches in different folders leave the conversation unassigned. Manual placement takes priority. Adding or removing a binding does not reorganize existing conversations or move files.
+
+## Appearance and preview
+
+The installed settings page begins with **About the plugin**, showing the icon and a summary. Switch between Russian and English for the description, and use **Read full description** to expand the complete overview. These language tabs do not change the interface language.
+
+Open **View options → Appearance settings…** or the plugin’s appearance settings. Choose English or Russian explicitly, or follow Paseo’s language. Simplified Chinese translations from the original edition are also available when following Paseo. User-created names remain as entered.
+
+Adjust text from 10 to 18 pt, row height, group spacing, nesting indentation, bold group names, icons, status dots, folded-row status, the pinned section, activity timestamps, and one- or two-line titles. The default uses 12 pt text and single-line titles; phone rows retain touch targets of at least 44 px.
+
+The preview uses sample conversations rather than private data. It includes custom tabs, title search, pinned folders and chats, Recent, In progress, nested folders, subtasks, running, approval, error and unread states, and project/server grouping. Changes to appearance, recent limits, sorting, server labels, and background-workspace visibility are reflected in the sample. Scroll to see all sections; expand folders and subtasks or switch sample tabs without changing real chats.
+
+## Setup and saved data
+
+Requires Paseo `>=0.17.3 <0.18.0` on the daemon and clients. Select **Conversation Hub** in **Settings → Sidebar → Sidebar view** on each device. Appearance settings are available under the plugin’s settings. No additional account or token is needed.
+
+Folder structure, membership, pins, project appearance, custom tabs, display preferences, and automatic-assignment rules are saved on the host and update across connected clients. Appearance, language override, open branches, expanded lists, and the selected tab are stored per device. **Reset appearance** preserves folders, conversations, and their order.
+
+The plugin reads conversation and workspace metadata from connected Paseo hosts, saves organization settings, and uses Paseo operations for requested actions. Conversation rename uses the local daemon SDK. Permanent deletion runs the Paseo CLI on the plugin host; Windows uses the CLI bundled with the desktop app. The plugin reads the daemon’s own paseo.pid and local-credential to connect back to that same host for settings and rename operations; these credentials are not sent to external services. Git worktree detection may run a local git rev-parse. Directory bindings do not move files. The plugin does not send organization data to an external service.
+
+## Limitations
+
+Rename and permanent deletion are available for the plugin’s local host; use the original host’s controls for remote conversations. Permanent deletion removes chat history. Manual mark-as-unread and opening a file manager are unavailable through the supported API.
+
+Touch dragging has been checked in a phone-sized browser with simulated touch; physical-device and simultaneous multi-host acceptance remain incomplete. Project tiles may differ from Paseo’s Git-remote-based colors because the plugin cannot read that remote. The preview illustrates settings and sample interactions; it does not run real archive/delete operations, filesystem assignment, or cross-host drag and drop.
+
+Based on [Conversation folders Plus by xiaobaifly7](https://paseo.sh/plugins/xiaobaifly7/conversation-folders-plus), which builds on [Conversation folders by Cocean001](https://github.com/Cocean001/paseo-conversation-folders).

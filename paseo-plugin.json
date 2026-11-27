@@ -1,33 +1,27 @@
 {
   "id": "conversation-folders-plus",
-  "name": "Conversation folders Plus",
+  "name": "Conversation Hub",
   "requirements": {
-    "paseo": ">=0.16.0-beta.1 <0.18.0"
+    "paseo": ">=0.17.3 <0.18.0"
   },
-  "description": "Organize existing Paseo conversations with folders, an In progress list, folded subtasks, custom tabs, project grouping, and filters.",
+  "description": "Organize Paseo chats with nested folders, independent tabs, pins, recent activity, workspace directory rules, status filters, drag and drop, and a customizable sidebar.",
   "translations": {
     "zh-CN": {
-      "name": "对话文件夹增强版",
+      "name": "Conversation Hub",
       "description": "用文件夹、进行中列表、子任务折叠、自定义标签页、项目分组与筛选整理已有 Paseo 对话。"
+    },
+    "ru": {
+      "name": "Conversation Hub",
+      "description": "Организация чатов в папки и вкладки: закрепления, недавние задачи, поиск и автоматическое распределение по каталогам проектов."
     }
   },
   "media": [
-    "assets/screenshots/sidebar-desktop.png",
-    "assets/screenshots/sidebar-dark.png",
-    "assets/screenshots/sidebar-zh-cn.png",
-    "assets/screenshots/sidebar-phone.png",
-    "assets/screenshots/new-folder-menu.png",
-    "assets/screenshots/new-folder-input.png",
-    "assets/screenshots/picker-current-layout.png",
-    "assets/screenshots/picker-original-sources.png",
-    "assets/screenshots/independent-work-tab.png",
-    "assets/screenshots/independent-design-tab.png",
-    "assets/screenshots/project-appearance.png",
-    "assets/screenshots/icon-picker.png",
-    "assets/screenshots/display-and-loading.png",
-    "assets/screenshots/conversation-actions.png",
-    "assets/screenshots/collapse-all.png",
-    "assets/screenshots/drag-conversation.png",
-    "assets/screenshots/move-result.png"
-  ]
+    "assets/screenshots/features-en.png",
+    "assets/screenshots/features-ru.png",
+    "assets/screenshots/settings-en.png",
+    "assets/screenshots/settings-ru.png",
+    "assets/screenshots/settings-phone-en.png",
+    "assets/screenshots/settings-phone-ru.png"
+  ],
+  "icon": "assets/icon.png"
 }

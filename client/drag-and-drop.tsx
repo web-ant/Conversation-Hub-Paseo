@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import { createLayoutMotion, conversationMotionKey, type MotionElement } from './layout-motion';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Platform, View } from 'react-native';
@@ -46,7 +47,7 @@ export function DragConversationRow({ source, children }: { source: DragConversa
     element.addEventListener('dragstart', start); element.addEventListener('dragend', end);
     return () => { unregister?.(); element.removeEventListener('dragstart', start); element.removeEventListener('dragend', end); element.draggable = false; element.removeAttribute?.('data-paseo-sidebar-dragging'); };
   }, [context, source.hostId, source.agentId, touch, steady]);
-  return <View ref={node} accessibilityHint="Drag to a folder or above another conversation to organize" style={{ minWidth: 0, ...(dragging ? { opacity: 0.5 } : {}) }}>{children}</View>;
+  return <View ref={node} accessibilityHint={t("Drag to a folder or above another conversation to organize")} style={{ minWidth: 0, ...(dragging ? { opacity: 0.5 } : {}) }}>{children}</View>;
 }
 export function ConversationDropTarget({ destination, children, view, activate }: { destination: ConversationDestination; children: ReactNode; view: PluginSidebarViewProps; activate?(): void }) {
   const context = useContext(DragContext);

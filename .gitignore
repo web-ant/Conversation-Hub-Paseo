@@ -10,6 +10,7 @@ coverage/
 # Local evidence; only release PNG screenshots are included / 本地验证；仅纳入发布用 PNG 截图
 /artifacts/
 /assets/*
+!/assets/icon.png
 !/assets/screenshots/
 /assets/screenshots/*
 !/assets/screenshots/*.png

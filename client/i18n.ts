@@ -1,8 +1,12 @@
+import { useSettings } from '@getpaseo/plugin/client';
+import { appearance } from '../shared/appearance';
+import { ru } from './ru';
 import { defineTranslations, useTranslation } from '@getpaseo/plugin/client';
 
 export const messages = defineTranslations({ resources: {
-  en: { viewTitle: 'Conversation folders Plus', viewDescription: 'Projects and folders with their conversations listed below' },
-  'zh-CN': { viewTitle: '对话文件夹增强版', viewDescription: '按项目和文件夹竖排列出对话' },
+  en: { viewTitle: 'Conversation Hub', viewDescription: 'Projects and folders with their conversations listed below', settingsTitle: 'Conversation Hub · Appearance' },
+  ru: { viewTitle: 'Conversation Hub', viewDescription: 'Чаты, сгруппированные по папкам и проектам', settingsTitle: 'Conversation Hub · Оформление' },
+  'zh-CN': { viewTitle: 'Conversation Hub', viewDescription: '按项目和文件夹竖排列出对话' },
 } });
 
 // English source text is the key, so untranslated strings fall back to English unchanged.
@@ -19,6 +23,10 @@ const zh: Record<string, string> = {
   'Drop conversations here': '把对话拖到这里', 'Rename': '重命名', 'Rename…': '重命名…', 'Move up': '上移', 'Delete folder': '删除文件夹',
   'Add conversations to this folder': '向此文件夹添加对话', 'Empty': '暂无对话', 'No projects': '没有项目', 'No connected servers': '没有已连接的服务器',
   'Group by': '分组', 'Custom folders': '自定义文件夹', 'Server': '服务器', 'Project': '项目', 'Server / Project': '服务器 / 项目',
+  'Sort folders by': '文件夹排序', 'Folder sort direction': '文件夹排序方向', 'Recent conversations': '最近对话', 'Show recent conversations': '显示最近对话', 'Recent conversation limit': '最近对话数量', '{0} conversations': '{0} 个对话',
+  'Shown below pinned conversations, newest activity first. Pinned conversations are excluded.': '显示在置顶对话下方，按最近活动排序，不重复显示置顶对话。',
+  'Last activity includes conversations in subfolders. Custom order preserves your drag order.': '最近活动包括子文件夹中的对话。自定义顺序保留拖放顺序。',
+  'Folder moved, but custom folder order could not be enabled.': '文件夹已移动，但未能启用自定义文件夹顺序。',
   'Sort by': '排序', 'Last activity': '最近活动', 'Creation time': '创建时间', 'Title': '标题', 'Custom order': '自定义顺序',
   'Ascending': '升序', 'Descending': '降序', 'Titles': '标题显示', 'Single line': '单行', 'Multiline': '多行', 'Display': '显示',
   'Server labels': '服务器名称', 'Conversation counts': '对话数量', 'Loading color': '运行动画颜色', 'Loading · {0}': '运行动画 · {0}',
@@ -63,14 +71,22 @@ const zh: Record<string, string> = {
 };
 
 let chinese = false;
+let russian = false;
 /** Call at the view root. shortcut: one app language per client bundle; rows read it through t(). */
-export function useAppLanguage() { chinese = useTranslation(messages).locale.toLowerCase().startsWith('zh'); }
+export function useAppLanguage() {
+  const appLocale = useTranslation(messages).locale;
+  const settings = useSettings(appearance);
+  const override = settings.status === 'ready' ? settings.values.language : 'auto';
+  const locale = (override === 'auto' ? appLocale : override).toLowerCase();
+  chinese = locale.startsWith('zh'); russian = locale.startsWith('ru');
+}
 export function t(text: string, ...args: Array<string | number>) {
-  return (chinese ? zh[text] ?? text : text).replace(/\{(\d)\}/g, (_, index) => String(args[Number(index)] ?? ''));
+  return (russian ? ru[text] ?? text : chinese ? zh[text] ?? text : text).replace(/\{(\d)\}/g, (_, index) => String(args[Number(index)] ?? ''));
 }
 const units: Record<string, string> = { m: '分钟', h: '小时', d: '天', w: '周', y: '年' };
 /** Localizes activityTime() output: now, 5m, 3h, 2d, 1w, 1y. */
 export function timeLabel(text: string) {
+  if (russian) return text === 'now' ? 'сейчас' : text.replace(/^(\d+)([mhdwy])$/, (_, count, unit) => count + ' ' + ({ m: 'мин', h: 'ч', d: 'дн', w: 'нед', y: 'г' } as Record<string,string>)[unit]);
   if (!chinese) return text;
   return text === 'now' ? '刚刚' : text.replace(/^(\d+)([mhdwy])$/, (_, count, unit) => count + units[unit]);
 }

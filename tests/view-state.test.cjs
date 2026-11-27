@@ -68,3 +68,13 @@ test('a rejected save reloads so the next change writes with a fresh revision', 
   await wait();
   assert.equal(h.reloads(), 1);
 });
+
+test('removing one pinned shortcut does not unregister the original branch',()=>{
+ const h=harness();let api=h.render();const regular=api.register('folder:x',true);const shortcut=api.register('folder:x',true);
+ shortcut();shortcut();api.toggleCollapseAll();api=h.render();assert.equal(api.isOpen('folder:x',true),false);
+ api.toggleCollapseAll();api=h.render();regular();api.toggleCollapseAll();api=h.render();assert.equal(api.isOpen('folder:x',true),true);
+});
+
+test('reveal opens just the target path and exits collapse-all state',()=>{
+ const h=harness({open:{'folder:other':false},showAll:[],activeTab:null});let api=h.render();api.toggleCollapseAll(['folder:root','folder:child']);api=h.render();assert.equal(api.collapsed,true);api.reveal(['folder:root','folder:child']);api=h.render();assert.equal(api.collapsed,false);assert.equal(api.isOpen('folder:root',false),true);assert.equal(api.isOpen('folder:child',false),true);assert.equal(api.isOpen('folder:other',true),false);
+});
