@@ -2,8 +2,9 @@
   "id": "conversation-hub",
   "name": "Conversation Hub",
   "requirements": {
-    "paseo": ">=0.17.3 <0.18.0"
+    "paseo": ">=0.17.3 <0.19.0"
   },
+  "build": [["npm", "ci", "--omit=dev", "--ignore-scripts", "--no-audit", "--no-fund"]],
   "description": "Organize Paseo chats with nested folders, independent tabs, pins, recent activity, workspace directory rules, status filters, drag and drop, and a customizable sidebar.",
   "translations": {
     "zh-CN": {

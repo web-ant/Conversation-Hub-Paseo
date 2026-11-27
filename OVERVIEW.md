@@ -52,7 +52,7 @@ The preview uses sample conversations rather than private data. It includes cust
 
 ## Setup and saved data
 
-Requires Paseo `>=0.17.3 <0.18.0` on the daemon and clients. Select **Conversation Hub** in **Settings → Sidebar → Sidebar view** on each device. Appearance settings are available under the plugin’s settings. No additional account or token is needed.
+Requires Paseo `>=0.17.3 <0.19.0` on the daemon and clients. Select **Conversation Hub** in **Settings → Sidebar → Sidebar view** on each device. Appearance settings are available under the plugin’s settings. No additional account or token is needed.
 
 Folder structure, membership, pins, project appearance, custom tabs, display preferences, and automatic-assignment rules are saved on the host and update across connected clients. Appearance, language override, open branches, expanded lists, and the selected tab are stored per device. **Reset appearance** preserves folders, conversations, and their order.
 
