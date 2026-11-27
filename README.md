@@ -8,7 +8,7 @@
 
 Organize Paseo conversations with folders, independent tabs, pinned and recent chats, workspace directory rules, and a sidebar you can customize.
 
-Conversation Hub is based on **[Conversation folders Plus by xiaobaifly7](https://paseo.sh/plugins/xiaobaifly7/conversation-folders-plus)** ([source](https://github.com/xiaobaifly7/paseo-conversation-folders)), which builds on [Conversation folders by Cocean001](https://github.com/Cocean001/paseo-conversation-folders). Original MIT copyright notices and Git history are preserved.
+Conversation Hub is based on **[Conversation folders Plus by xiaobaifly7](https://paseo.sh/plugins/xiaobaifly7/conversation-folders-plus)** ([source](https://github.com/xiaobaifly7/paseo-conversation-folders)), which builds on [Conversation folders by Cocean001](https://github.com/Cocean001/paseo-conversation-folders). Original MIT copyright notices and human authorship are preserved.
 
 ![Conversation Hub: folders, activity, and projects](assets/screenshots/features-en.png)
 
@@ -54,7 +54,7 @@ paseo plugin add git:web-ant/Conversation-Hub-Paseo
 
 Select **Conversation Hub** in **Settings → Sidebar → Sidebar view** on each device. Open **Settings → Plugins → Conversation Hub** for appearance, language, automatic assignment, and the full description.
 
-The runtime ID remains **`conversation-folders-plus`** for compatibility with existing folder settings and routing. The display name is **Conversation Hub**. This fork and the original plugin should not be installed under that same ID at the same time.
+The runtime ID is **`conversation-hub`** and the display name is **Conversation Hub**. Version 0.3.1 uses the new ID for fresh installations.
 
 ## Registry listing and the list icon
 
@@ -64,7 +64,9 @@ In current Paseo versions, the plugin-list icon and top-page icon come from the 
 
 ## Existing local installations
 
-Do not remove your existing installation to switch sources: removing a plugin also removes its saved settings. Keep the local installation while the registry listing is reviewed. Updating the source and preserving settings should be handled separately after publication.
+If your existing installation uses `conversation-folders-plus`, keep it and its source folder unchanged until its settings have been migrated and verified. Paseo stores settings under the installation ID; installing `conversation-hub` does not automatically transfer folders, tabs, pins, or rules. Appearance, expansion state, and the selected sidebar view also belong to each device. Do not uninstall the old plugin or enable both copies as a migration shortcut.
+
+This release changes the default ID for new installations. It does not rename existing installations or migrate their settings automatically. Back up host settings and each device’s preferences before switching an existing installation.
 
 ## Data and permissions
 
@@ -94,7 +96,7 @@ npm pack --dry-run --ignore-scripts
 For local development, typecheck first, then reload the existing runtime ID:
 
 ```sh
-paseo plugin reload conversation-folders-plus
+paseo plugin reload conversation-hub
 ```
 
 ## Limitations

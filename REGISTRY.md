@@ -3,9 +3,9 @@
 - Display name: **Conversation Hub**.
 - Requested listing ID: **web-ant/conversation-hub**; final ID is assigned during registry review.
 - Source: https://github.com/web-ant/Conversation-Hub-Paseo
-- Release reference: `v0.3.0`.
+- Release reference: `v0.3.1`.
 - Main category: **Sidebar**.
-- Runtime manifest ID: `conversation-folders-plus`, retained for the existing settings and routing contract. The registry listing ID and runtime ID serve different purposes.
+- Runtime manifest ID: `conversation-hub`. Version 0.3.1 changes the default ID for new installations; existing installation settings are not migrated automatically.
 - License: **MIT**, with original copyright notices preserved.
 
 ## Listing material
@@ -23,11 +23,11 @@ The manifest supplies an English default description and a Russian translation. 
 
 ## Attribution
 
-Based on [Conversation folders Plus by xiaobaifly7](https://paseo.sh/plugins/xiaobaifly7/conversation-folders-plus), which builds on [Conversation folders by Cocean001](https://github.com/Cocean001/paseo-conversation-folders). Upstream Git history is preserved.
+Based on [Conversation folders Plus by xiaobaifly7](https://paseo.sh/plugins/xiaobaifly7/conversation-folders-plus), which builds on [Conversation folders by Cocean001](https://github.com/Cocean001/paseo-conversation-folders). Original human commit authors and copyright notices are preserved.
 
 ## Submission and installation state
 
-Submitted as [issue #3432](https://github.com/getpaseo/plugins/issues/3432). The intake bot opened [review PR #3433](https://github.com/getpaseo/plugins/pull/3433) for release commit `15ab2a582bd0294ec1c7e0a1468f1c687301f141` (`v0.3.0`). Publication is pending registry review.
+Submitted as [issue #3432](https://github.com/getpaseo/plugins/issues/3432). The intake bot opened [review PR #3433](https://github.com/getpaseo/plugins/pull/3433) initially for release commit `15ab2a582bd0294ec1c7e0a1468f1c687301f141` (`v0.3.0`). The current release reference is `v0.3.1`, with manifest ID `conversation-hub`. Publication is pending registry review.
 
 Use the [official submission form](https://github.com/getpaseo/plugins/issues/new?template=submit-plugin.yml), set the title to `Conversation Hub`, provide the source above with the release reference, and select **Sidebar**.
 

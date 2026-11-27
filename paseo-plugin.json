@@ -1,5 +1,5 @@
 {
-  "id": "conversation-folders-plus",
+  "id": "conversation-hub",
   "name": "Conversation Hub",
   "requirements": {
     "paseo": ">=0.17.3 <0.18.0"

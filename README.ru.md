@@ -8,7 +8,7 @@
 
 Организуйте чаты Paseo с помощью папок, независимых вкладок, закреплённых и недавних задач, правил каталогов и настраиваемой боковой панели.
 
-Conversation Hub основан на **[Conversation folders Plus от xiaobaifly7](https://paseo.sh/plugins/xiaobaifly7/conversation-folders-plus)** ([исходники](https://github.com/xiaobaifly7/paseo-conversation-folders)), который развивает [Conversation folders от Cocean001](https://github.com/Cocean001/paseo-conversation-folders). Исходные уведомления об авторских правах MIT и история Git сохранены.
+Conversation Hub основан на **[Conversation folders Plus от xiaobaifly7](https://paseo.sh/plugins/xiaobaifly7/conversation-folders-plus)** ([исходники](https://github.com/xiaobaifly7/paseo-conversation-folders)), который развивает [Conversation folders от Cocean001](https://github.com/Cocean001/paseo-conversation-folders). Исходные уведомления об авторских правах MIT и авторство разработчиков сохранены.
 
 ![Conversation Hub: папки, активность и проекты](assets/screenshots/features-ru.png)
 
@@ -54,7 +54,7 @@ paseo plugin add git:web-ant/Conversation-Hub-Paseo
 
 На каждом устройстве выберите **Conversation Hub** в **Настройки → Боковая панель → Вид боковой панели**. В **Настройки → Плагины → Conversation Hub** находятся оформление, язык, автоматическое распределение и полное описание.
 
-Технический ID остаётся **`conversation-folders-plus`** для совместимости с сохранёнными папками и маршрутизацией. Отображаемое название — **Conversation Hub**. Эту версию и исходный плагин нельзя одновременно установить под одним ID.
+Технический ID — **`conversation-hub`**, отображаемое название — **Conversation Hub**. Версия 0.3.1 использует новый ID для новых установок.
 
 ## Реестр и иконка в списке плагинов
 
@@ -64,7 +64,9 @@ paseo plugin add git:web-ant/Conversation-Hub-Paseo
 
 ## Если плагин уже установлен локально
 
-Не удаляйте установленный плагин ради смены источника: удаление также стирает его сохранённые настройки. Оставьте локальную установку на время проверки записи. Смену источника с сохранением настроек нужно выполнять отдельно после публикации.
+Если ваша установка использует `conversation-folders-plus`, сохраните её и исходную папку без изменений до проверенного переноса настроек. Paseo хранит настройки под ID установки: установка `conversation-hub` сама по себе не переносит папки, вкладки, закрепления и правила. Оформление, состояние раскрытия и выбранное представление боковой панели также хранятся отдельно на каждом устройстве. Не удаляйте старый плагин и не включайте обе копии для переноса.
+
+Эта версия меняет ID по умолчанию для новых установок. Она не переименовывает действующие установки и не переносит настройки автоматически. До переключения существующей установки сохраните резервную копию настроек сервера и каждого устройства.
 
 ## Данные и доступ
 
@@ -94,7 +96,7 @@ npm pack --dry-run --ignore-scripts
 При локальной разработке сначала проверьте типы, затем перезагрузите существующий ID:
 
 ```sh
-paseo plugin reload conversation-folders-plus
+paseo plugin reload conversation-hub
 ```
 
 ## Ограничения
