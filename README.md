@@ -58,7 +58,7 @@ The runtime ID remains **`conversation-folders-plus`** for compatibility with ex
 
 ## Registry listing and the list icon
 
-The registry submission is being prepared. Direct Git installation works before the listing is approved. The registry ID and install command will be added here after publication.
+The registry submission is open as [issue #3432](https://github.com/getpaseo/plugins/issues/3432), with [review PR #3433](https://github.com/getpaseo/plugins/pull/3433). Direct Git installation works before the listing is approved. The registry ID and install command will be added here after publication.
 
 In current Paseo versions, the plugin-list icon and top-page icon come from the registry listing. Direct Git or local installation can show the default initial in those positions; the custom icon is already visible inside the plugin’s settings. After approval, install through the published registry entry for its listing icon and translated listing text. No changes to Paseo source code are needed.
 

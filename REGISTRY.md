@@ -27,6 +27,8 @@ Based on [Conversation folders Plus by xiaobaifly7](https://paseo.sh/plugins/xia
 
 ## Submission and installation state
 
+Submitted as [issue #3432](https://github.com/getpaseo/plugins/issues/3432). The intake bot opened [review PR #3433](https://github.com/getpaseo/plugins/pull/3433) for release commit `15ab2a582bd0294ec1c7e0a1468f1c687301f141` (`v0.3.0`). Publication is pending registry review.
+
 Use the [official submission form](https://github.com/getpaseo/plugins/issues/new?template=submit-plugin.yml), set the title to `Conversation Hub`, provide the source above with the release reference, and select **Sidebar**.
 
 Submitting creates a review request; it does not publish the listing immediately. The registry maintainers review and pin an exact commit. After approval, install through the published registry ID to use the registry icon in Paseo’s installed-plugin list. Direct Git installation alone does not link that list item to the registry.
