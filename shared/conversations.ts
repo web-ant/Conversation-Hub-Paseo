@@ -1,7 +1,7 @@
 /** Presentation-only query policy shared by manual and automatic trees. */
 export type SortBy = 'activity' | 'created' | 'title' | 'manual';
 export type ConversationFilter = 'all' | 'running' | 'attention' | 'errors';
-export interface ConversationOptions { members?: readonly {hostId:string;agentId:string}[]; parents?: ReadonlySet<string>; pinned?: ReadonlySet<string>; showCounts?: boolean; loadingColor?: string; collapseVersion?: number; allCollapsed?: boolean; freshFolderId?: string; loadingEffect?: 'spinner' | 'orbit' | 'pulse' | 'dots' | 'bars'; sortBy: SortBy; sortDirection: 'asc' | 'desc'; filter: ConversationFilter; search: string; workspaceKeys?: readonly string[] }
+export interface ConversationOptions { permissionCount?(agent: { hostId: string; id: string }): number; members?: readonly {hostId:string;agentId:string}[]; parents?: ReadonlySet<string>; pinned?: ReadonlySet<string>; showCounts?: boolean; loadingColor?: string; collapseVersion?: number; allCollapsed?: boolean; freshFolderId?: string; loadingEffect?: 'spinner' | 'orbit' | 'pulse' | 'dots' | 'bars'; sortBy: SortBy; sortDirection: 'asc' | 'desc'; filter: ConversationFilter; search: string; workspaceKeys?: readonly string[] }
 export interface ConversationSnapshot { id: string; hostId: string; title: string | null; status: string; createdAt: string; lastActivityAt: string; requiresAttention: boolean; attentionReason: string | null; workspace?: { key: string }; background?: boolean; parentAgent?: { key: string } | null }
 export const defaultConversationOptions: ConversationOptions = { sortBy: 'activity', sortDirection: 'desc', filter: 'all', search: '' };
 // A prompt that opens with a pasted session id would spend a whole title line on it; search still sees the full title.
@@ -15,8 +15,11 @@ export function matchesConversation(agent: ConversationSnapshot, options: Conver
   if (options.members && !options.members.some(member => member.hostId === agent.hostId && member.agentId === agent.id)) return false;
   if (options.workspaceKeys && (!agent.workspace || !options.workspaceKeys.includes(agent.workspace.key))) return false;
   if (options.search.trim() && !(agent.title || 'Untitled conversation').toLocaleLowerCase().includes(options.search.trim().toLocaleLowerCase())) return false;
-  if (options.filter === 'running') return agent.status === 'running' || agent.status === 'initializing';
-  if (options.filter === 'attention') return agent.requiresAttention;
+  if (options.filter === 'running' || options.filter === 'attention') {
+    const waiting = (options.permissionCount?.(agent) ?? 0) > 0 || agent.attentionReason === 'permission';
+    if (options.filter === 'attention') return waiting || agent.requiresAttention;
+    return !waiting && (agent.status === 'running' || agent.status === 'initializing');
+  }
   if (options.filter === 'errors') return agent.status === 'error' || agent.attentionReason === 'error';
   return true;
 }

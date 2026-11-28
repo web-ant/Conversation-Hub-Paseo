@@ -14,10 +14,18 @@ test('running conversations stay above the rest and keep creation order while th
 });
 test('status filters combine with case-insensitive title search',()=>{
  assert.equal(matchesConversation(a,{...defaults,search:' zEtA '}),true);assert.equal(matchesConversation(b,{...defaults,search:'Zeta'}),false);
- assert.equal(matchesConversation(a,{...defaults,filter:'running'}),false);assert.equal(matchesConversation(b,{...defaults,filter:'running'}),true);
+ assert.equal(matchesConversation(a,{...defaults,filter:'running'}),false);assert.equal(matchesConversation(b,{...defaults,filter:'running'}),false);
  assert.equal(matchesConversation(b,{...defaults,filter:'attention',search:'ALP'}),true);assert.equal(matchesConversation(a,{...defaults,filter:'attention'}),false);
  assert.equal(matchesConversation({...a,status:'error'},{...defaults,filter:'errors'}),true);assert.equal(matchesConversation({...a,attentionReason:'error'},{...defaults,filter:'errors'}),true);
  assert.equal(matchesConversation({...a,status:'initializing'},{...defaults,filter:'running'}),true);
+});
+
+test('pending requests move a running conversation into attention without an unread flag',()=>{
+ const waiting={...a,status:'running'};
+ const options={...defaults,permissionCount:()=>2};
+ assert.equal(matchesConversation(waiting,{...options,filter:'attention'}),true);
+ assert.equal(matchesConversation(waiting,{...options,filter:'running'}),false);
+ assert.equal(matchesConversation(waiting,{...defaults,filter:'running'}),true);
 });
 
 test('background helper agents never show as conversations',()=>{const base={id:'x',hostId:'h',title:'Codex run',status:'idle',createdAt:'',lastActivityAt:'',requiresAttention:false,attentionReason:null};assert.equal(matchesConversation({...base,background:true},defaults),false);assert.equal(matchesConversation(base,defaults),true);});

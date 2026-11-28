@@ -1,12 +1,13 @@
 import type { PluginClientContext, PluginSidebarViewProps } from '@getpaseo/plugin/client';
 import { SidebarWithTabs } from './client/sidebar';
+import { SidebarPermissions } from './client/pending-permissions';
 import { messages } from './client/i18n';
 import { AppearanceSettings, ConversationHubIcon } from './client/settings-screen';
 import { ViewActionsContext } from './client/density';
 export default function contribute(client: PluginClientContext) {
   const actions = { openAppearanceSettings: () => client.openSettings('appearance') };
   function SidebarView(props: PluginSidebarViewProps) {
-    return <ViewActionsContext.Provider value={actions}><SidebarWithTabs {...props} /></ViewActionsContext.Provider>;
+    return <ViewActionsContext.Provider value={actions}><SidebarPermissions><SidebarWithTabs {...props} /></SidebarPermissions></ViewActionsContext.Provider>;
   }
   const cleanup = [
     client.addSettingsScreen({ id: 'appearance', title: messages.message('settingsTitle'), icon: ConversationHubIcon, Component: AppearanceSettings }),

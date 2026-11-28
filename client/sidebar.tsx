@@ -9,6 +9,7 @@ import { appearance } from '../shared/appearance';
 import { currentPickerTree } from '../shared/folder-picker';
 import { FolderAdd } from './folder-add';
 import { ConversationViewContext } from './conversation-view';
+import { usePermissionCount } from './pending-permissions';
 import { FolderDragProvider, DragFolderRow, FolderDropTarget, type DragFolder, type FolderDestination } from './folder-drag';
 import { SidebarTabsView, type SidebarTabScope, type SidebarTabControls } from './sidebar-tabs';
 import { ConversationActions } from './conversation-actions';
@@ -40,16 +41,18 @@ const feedback = Platform?.OS === 'web' && mediaQuery && !mediaQuery('(prefers-r
 type SubtaskChip = { count: number; open: boolean; alert: boolean; toggle(): void };
 function ConversationRow({ reference, view, select, moving, detailed, serverLabel, loadingEffect, loadingColor, subtasks, nested, drag, shortcut=false }: { shortcut?:boolean; drag?: DragConversation; subtasks?: SubtaskChip; nested?: boolean; loadingColor?: string; loadingEffect?: LoadingEffect; reference: AgentRef; view: PluginSidebarViewProps; select(id: string): void; moving: boolean; detailed?: boolean; serverLabel?: string }) {
   const agent = useAgent(reference, a => ({ title: a.title, status: a.status, requiresAttention: a.requiresAttention, attentionReason: a.attentionReason, lastActivityAt: a.lastActivityAt }));
+  const permissionCount = usePermissionCount()(reference);
   const touch = useTouchDrag();
   const metrics = useSidebarMetrics();
   const followRef=useFollowChatRow(reference.key,shortcut);
   if (!agent) return null;
+  const state = conversationState(agent, permissionCount);
   const c = view.theme.colors;
   const selected = view.active.agent?.key === reference.key;
   return <ConversationActions reference={reference} view={view} shortcut={shortcut}>{openActions => <View ref={followRef} collapsable={false} style={{ ...feedback, flexDirection: 'row', alignItems: 'center', minWidth: 0, borderRadius: 6, paddingVertical: 0 }}>
     <Pressable theme={view.theme} hoverBackground={selected?c.surface2:"transparent"} pressedBackground={selected?c.surface2:undefined} accessibilityState={{ selected }} accessibilityRole="button" accessibilityLabel={agent.title || t('Untitled conversation')} onPress={() => view.navigation.openAgent(reference)} onLongPress={moving ? () => select(reference.id) : touchMenu(view) ? () => { if (touch && drag) touch.lift({ kind: 'conversation', value: drag }, agent.title ? shownTitle(agent.title) : t('Untitled conversation'), openActions); else openActions(); } : undefined} style={() => ({ flex: 1, minWidth: 0, minHeight: metrics.row, paddingLeft: 10, paddingRight: 6, flexDirection: 'row', alignItems: 'center', gap: metrics.gap, backgroundColor: selected ? c.surface2 : 'transparent', borderRadius: 6 })}>
       {/* Inside a parent, a finished unread subtask is not news; running, permission and error still show. */}
-      {metrics.showStatusDots && <StatusMark loadingColor={loadingColor} loadingEffect={loadingEffect} state={nested && conversationState(agent) === 'updated' ? 'finished' : conversationState(agent)} theme={view.theme} />}
+      {metrics.showStatusDots && <StatusMark loadingColor={loadingColor} loadingEffect={loadingEffect} state={nested && state === 'updated' ? 'finished' : state} theme={view.theme} />}
       <View style={{ flex: 1, minWidth: 0, paddingVertical: serverLabel || detailed ? 4 : 0 }}>
         <Text selectable={false} numberOfLines={detailed ? 2 : 1} style={{ color: nested ? c.foregroundMuted : c.foreground, fontSize: nested ? metrics.nestedText : metrics.text, lineHeight: nested ? metrics.nestedLine : metrics.line, fontWeight: selected ? '600' : '400' }}>{agent.title ? shownTitle(agent.title) : t('Untitled conversation')}</Text>
         {serverLabel && <Text selectable={false} numberOfLines={1} style={{ color: c.foregroundMuted, fontSize: metrics.nestedText, lineHeight: metrics.nestedLine }}>{serverLabel}</Text>}
@@ -67,6 +70,7 @@ export function SidebarWithTabs(view: PluginSidebarViewProps) {
 }
 export function FolderSidebar(view: PluginSidebarViewProps & {tabScope?: SidebarTabScope; tabControls?:SidebarTabControls}) {
   const { tabScope } = view;
+  const permissionCount = usePermissionCount();
   const viewActions = useContext(ViewActionsContext);
   const metrics = useSidebarMetrics();
   const appearanceSettings = useSettings(appearance);
@@ -151,8 +155,8 @@ export function FolderSidebar(view: PluginSidebarViewProps & {tabScope?: Sidebar
   // Subtasks nest under a parent that is itself listed; children of hidden parents stay top-level.
   const parents = new Set(allAgents.filter(agent => !tabScope || tabScope.tab.members.some(member => member.hostId === agent.hostId && member.agentId === agent.id)).map(agent => agent.key));
   const subtaskGroups = useSteadyList(useAgents({ where: agent => !agent.background && !!agent.parentAgent, groupBy: agent => agent.parentAgent!.key, orderBy: latestFirst }));
-  const alertedParents = new Set(useAgents({ where: agent => !agent.background && !!agent.parentAgent && ['permission', 'error'].includes(conversationState(agent)), groupBy: agent => agent.parentAgent!.key }).map(group => group.key));
-  const conversationOptions: ConversationOptions = { parents, pinned: pinnedKeys, ...(tabScope ? {members:tabScope.tab.members} : {}), ...defaultConversationOptions, ...options, search, workspaceKeys, freshFolderId };
+  const alertedParents = new Set(useAgents({ where: agent => !agent.background && !!agent.parentAgent && ['permission', 'error'].includes(conversationState(agent, permissionCount(agent))), groupBy: agent => agent.parentAgent!.key }).map(group => group.key));
+  const conversationOptions: ConversationOptions = { parents, pinned: pinnedKeys, ...(tabScope ? {members:tabScope.tab.members} : {}), ...defaultConversationOptions, ...options, search, workspaceKeys, freshFolderId, permissionCount };
   // The settings screen and the quick menu share the same per-device title preference.
   const titleLines = metrics.titleLines;
   const detailed = titleLines === 2;
@@ -169,7 +173,7 @@ export function FolderSidebar(view: PluginSidebarViewProps & {tabScope?: Sidebar
   const expand = (id: string) => viewApi?.setOpen(folderKey(id), true);
   const agents = useSteadyList(useAgents({ hosts: onlyHost ? [onlyHost] : [], where: agent => matchesConversation(agent, conversationOptions), orderBy: conversationOrder(conversationOptions) }));
   const nativeAgents = useAgents({ groupBy: agent => agent.workspace.key });
-  const stateGroups = useAgents({ where: agent => (!tabScope || tabScope.tab.members.some(member => member.hostId === agent.hostId && member.agentId === agent.id)) && !quietSubtask(agent), groupBy: agent => conversationState(agent) });
+  const stateGroups = useAgents({ where: agent => (!tabScope || tabScope.tab.members.some(member => member.hostId === agent.hostId && member.agentId === agent.id)) && !quietSubtask(agent, permissionCount(agent)), groupBy: agent => conversationState(agent, permissionCount(agent)) });
   const filteredAgents = useSteadyList(useAgents({ where: agent => matchesConversation(agent, conversationOptions), orderBy: conversationOrder(conversationOptions) }));
   const visible = agents;
   const button = (label: string, press: () => void) => <Pressable theme={view.theme} accessibilityRole="button" accessibilityLabel={label} onPress={press} style={({ pressed }) => ({ minHeight: metrics.action, minWidth: (label === '＋' || label === '⋮') ? metrics.action : undefined, paddingHorizontal: metrics.inset, paddingVertical: metrics.dense ? 2 : 6, justifyContent: 'center', flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: 6, backgroundColor: pressed ? c.surface2 : c.surface1, flexShrink: 0 })}>{(label === 'New folder' || label === '＋') ? <Glyph name="plus" color={c.foregroundMuted} /> : label === '⋮' ? <Glyph name="menu" color={c.foregroundMuted} /> : label === 'View options' ? <Glyph name="settings" color={c.foregroundMuted} /> : null}{label !== '＋' && label !== '⋮' && <Text style={{ color: c.foregroundMuted, fontSize: 12, lineHeight: 16 }}>{t(label)}</Text>}</Pressable>;
@@ -467,8 +471,8 @@ function ActiveSection({ view, options, row, dense }: { view: PluginSidebarViewP
   // Starts folded when its rows already top their lists (latest activity first) or the sidebar is short. An explicit open is remembered.
   const [open, setOpen] = useBranchOpen('active', !(dense || (options.sortBy === 'activity' && options.sortDirection === 'desc')));
   const active = useSteadyList(useAgents({
-    where: agent => ['running', 'permission', 'error', 'updated'].includes(conversationState(agent)) && !quietSubtask(agent) && matchesConversation(agent, { ...options, parents: undefined }),
-    orderBy: (a, b) => urgency(conversationState(a)) - urgency(conversationState(b)) || latestFirst(a, b),
+    where: agent => ['running', 'permission', 'error', 'updated'].includes(conversationState(agent, options.permissionCount?.(agent))) && !quietSubtask(agent, options.permissionCount?.(agent)) && matchesConversation(agent, { ...options, parents: undefined }),
+    orderBy: (a, b) => urgency(conversationState(a, options.permissionCount?.(a))) - urgency(conversationState(b, options.permissionCount?.(b))) || latestFirst(a, b),
   }));
   if (!active.length) return null;
   return <View style={{ minWidth: 0, marginBottom: 6 }}>
