@@ -46,7 +46,7 @@ The [Russian README](README.ru.md) includes the same screens in Russian.
 
 ## Install from GitHub
 
-Requires **Paseo `>=0.17.3 <0.18.0`** on the daemon and clients. Install the plugin on the daemon that owns your conversations:
+Requires **Paseo `>=0.17.3 <0.19.0`** on the daemon and clients. The daemon host needs `npm` on its PATH and access to the npm registry to install the plugin’s locked server dependencies. Install the plugin on the daemon that owns your conversations:
 
 ```sh
 paseo plugin add git:web-ant/Conversation-Hub-Paseo

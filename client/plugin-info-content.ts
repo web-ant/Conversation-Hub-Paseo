@@ -108,7 +108,7 @@ export const pluginInfo = {
     },
     {
       "kind": "paragraph",
-      "text": "Требуется Paseo `>=0.17.3 <0.18.0` на сервере и клиентах. Выберите **Conversation Hub** в **Настройки → Боковая панель → Вид боковой панели** на каждом устройстве. Оформление доступно в настройках плагина. Дополнительные аккаунты и токены не нужны."
+      "text": "Требуется Paseo `>=0.17.3 <0.19.0` на сервере и клиентах. Выберите **Conversation Hub** в **Настройки → Боковая панель → Вид боковой панели** на каждом устройстве. Оформление доступно в настройках плагина. Дополнительные аккаунты и токены не нужны."
     },
     {
       "kind": "paragraph",
@@ -242,7 +242,7 @@ export const pluginInfo = {
     },
     {
       "kind": "paragraph",
-      "text": "Requires Paseo `>=0.17.3 <0.18.0` on the daemon and clients. Select **Conversation Hub** in **Settings → Sidebar → Sidebar view** on each device. Appearance settings are available under the plugin’s settings. No additional account or token is needed."
+      "text": "Requires Paseo `>=0.17.3 <0.19.0` on the daemon and clients. Select **Conversation Hub** in **Settings → Sidebar → Sidebar view** on each device. Appearance settings are available under the plugin’s settings. No additional account or token is needed."
     },
     {
       "kind": "paragraph",

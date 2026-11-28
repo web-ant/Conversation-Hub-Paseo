@@ -19,7 +19,7 @@
 - Russian feature screenshot: [assets/screenshots/features-ru.png](assets/screenshots/features-ru.png).
 - Current desktop and compact settings screenshots are declared in `paseo-plugin.json`.
 
-The manifest supplies an English default description and a Russian translation. The overview and icon are embedded in the plugin settings as well as included as listing assets. No dependency installation or preparation commands run when the plugin is installed; Paseo compiles the committed runtime sources.
+The manifest supplies an English default description and a Russian translation. The overview and icon are embedded in the plugin settings as well as included as listing assets. For Git installations, Paseo installs the server dependencies from `package-lock.json` without running dependency lifecycle scripts, then compiles the committed runtime sources. The daemon host needs npm and access to its registry.
 
 ## Attribution
 
